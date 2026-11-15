@@ -1,0 +1,1672 @@
+{
+ "paket": [
+  {
+   "id": "PKT-MWHW1CNV4",
+   "dibuat": "2026-11-15T13:46:20.635Z",
+   "meta": {
+    "nama": "RANSOM-93 vs Pos Logistik",
+    "satuan": {
+     "id": "poslog",
+     "nama": "Pos Logistik",
+     "jenis": "Satuan Perbekalan",
+     "personel": 42,
+     "lokasi": "Bekasi, Jawa Barat",
+     "misi": "Mendukung distribusi perbekalan dan material satuan jajaran",
+     "host": "PC-ADM-01",
+     "srv": "SRV-INVENTORI",
+     "edge": "RT-EDGE-01",
+     "ot": "TIMBANGAN-DIGITAL-01",
+     "kritis": [
+      "Data stok dan pengadaan",
+      "Sistem inventori gudang",
+      "Jalur distribusi"
+     ],
+     "paparan": [
+      "Akses internet terbatas 20 Mbps",
+      "Akun admin dipakai bersama 3 orang",
+      "Tidak ada EDR, hanya antivirus bawaan"
+     ],
+     "catatan": "Personel TI: 2 orang. Jam operasional 07.00–16.00, gudang dijaga 24 jam."
+    },
+    "aktor": {
+     "id": "ransomware",
+     "nama": "RANSOM-93",
+     "jenis": "Ransomware Kriminal",
+     "asal": "Kelompok kriminal berbayar, bergerak cepat",
+     "motivasi": "Pemerasan finansial",
+     "kemampuan": "Sedang",
+     "ciri": "Menyasar server file dan cadangan, menuntut tebusan dalam 72 jam",
+     "killchain": [
+      {
+       "fase": "Akses Awal",
+       "teknik": [
+        {
+         "id": "T1566.002",
+         "nama": "Spearphishing Link"
+        },
+        {
+         "id": "T1078",
+         "nama": "Valid Accounts"
+        }
+       ],
+       "indikator": [
+        "Email \"tagihan pengadaan\" dari domain mirip",
+        "Login VPN di luar jam dinas"
+       ]
+      },
+      {
+       "fase": "Eksekusi",
+       "teknik": [
+        {
+         "id": "T1204.002",
+         "nama": "Malicious File"
+        },
+        {
+         "id": "T1059.001",
+         "nama": "PowerShell"
+        }
+       ],
+       "indikator": [
+        "powershell -enc pada PC admin",
+        "File .lnk di folder berbagi"
+       ]
+      },
+      {
+       "fase": "Pemetaan",
+       "teknik": [
+        {
+         "id": "T1046",
+         "nama": "Network Service Discovery"
+        },
+        {
+         "id": "T1021.002",
+         "nama": "SMB/Windows Admin Shares"
+        }
+       ],
+       "indikator": [
+        "Scan SMB 445 internal",
+        "Akses admin$ dari PC non-admin"
+       ]
+      },
+      {
+       "fase": "Dampak",
+       "teknik": [
+        {
+         "id": "T1486",
+         "nama": "Data Encrypted for Impact"
+        },
+        {
+         "id": "T1490",
+         "nama": "Inhibit System Recovery"
+        }
+       ],
+       "indikator": [
+        "Ekstensi .r93 pada file",
+        "vssadmin delete shadows"
+       ]
+      }
+     ],
+     "injects": [
+      {
+       "kanal": "Telepon",
+       "judul": "Laporan staf: file tidak bisa dibuka",
+       "narasi": "Pukul 08.10 staf administrasi menelepon. Seluruh file di folder berbagi pada {SRV} berubah nama dengan akhiran .r93 dan tidak bisa dibuka. Di layar muncul catatan tebusan berbahasa Indonesia dengan hitungan waktu 72 jam.",
+       "pertanyaan": "Apa dua tindakan pertama yang Anda perintahkan?",
+       "opsi": [
+        {
+         "teks": "Putuskan tautan jaringan server file dan matikan akses berbagi",
+         "skor": {
+          "deteksi": 2,
+          "containment": 10,
+          "eradikasi": 2,
+          "forensik": 1,
+          "pelaporan": 3,
+          "komando": 5
+         },
+         "baik": true,
+         "umpan": "Benar. Isolasi segera membatasi penyebaran ke PC lain."
+        },
+        {
+         "teks": "Minta staf mematikan PC masing-masing dan mencabut kabel LAN",
+         "skor": {
+          "deteksi": 2,
+          "containment": 7,
+          "eradikasi": 1,
+          "forensik": 1,
+          "pelaporan": 2,
+          "komando": 3
+         },
+         "baik": true,
+         "umpan": "Cukup baik, tetapi tanpa koordinasi bisa menghapus bukti di memori."
+        },
+        {
+         "teks": "Restart server untuk melihat apakah masalah hilang",
+         "skor": {
+          "deteksi": 0,
+          "containment": 0,
+          "eradikasi": 0,
+          "forensik": 0,
+          "pelaporan": 0,
+          "komando": 0
+         },
+         "baik": false,
+         "umpan": "Salah. Restart mempercepat enkripsi dan menghapus jejak memori."
+        },
+        {
+         "teks": "Hubungi nomor pada catatan tebusan untuk menegosiasi",
+         "skor": {
+          "deteksi": 0,
+          "containment": 0,
+          "eradikasi": 0,
+          "forensik": 0,
+          "pelaporan": 1,
+          "komando": 0
+         },
+         "baik": false,
+         "umpan": "Salah. Ini melanggar prosedur dan membuka jalur komunikasi dengan pelaku."
+        }
+       ]
+      },
+      {
+       "kanal": "Dashboard Monitoring",
+       "judul": "Trafik SMB masif antar-PC",
+       "narasi": "Sensor jaringan mencatat lonjakan koneksi SMB (port 445) dari {HOST} ke enam PC lain dalam dua menit. Pola ini tidak pernah terjadi sebelumnya.",
+       "pertanyaan": "Apa yang Anda lakukan dengan temuan ini?",
+       "opsi": [
+        {
+         "teks": "Blokir SMB antar-workstation di firewall dan catat sumbernya",
+         "skor": {
+          "deteksi": 8,
+          "containment": 8,
+          "eradikasi": 2,
+          "forensik": 3,
+          "pelaporan": 4,
+          "komando": 4
+         },
+         "baik": true,
+         "umpan": "Tepat. Deteksi dini plus penahanan langsung di titik penyebaran."
+        },
+        {
+         "teks": "Laporkan ke atasan lalu tunggu instruksi",
+         "skor": {
+          "deteksi": 4,
+          "containment": 0,
+          "eradikasi": 0,
+          "forensik": 1,
+          "pelaporan": 6,
+          "komando": 2
+         },
+         "baik": false,
+         "umpan": "Setengah benar. Pelaporan penting, tetapi penundaan memberi pelaku waktu."
+        },
+        {
+         "teks": "Matikan seluruh jaringan satuan",
+         "skor": {
+          "deteksi": 3,
+          "containment": 6,
+          "eradikasi": 0,
+          "forensik": 0,
+          "pelaporan": 2,
+          "komando": 1
+         },
+         "baik": false,
+         "umpan": "Terlalu agresif. Menghentikan seluruh operasi tanpa dasar yang cukup."
+        },
+        {
+         "teks": "Abaikan karena trafik internal dianggap normal",
+         "skor": {
+          "deteksi": 0,
+          "containment": 0,
+          "eradikasi": 0,
+          "forensik": 0,
+          "pelaporan": 0,
+          "komando": 0
+         },
+         "baik": false,
+         "umpan": "Salah. Ini justru sinyal penyebaran lateral paling jelas."
+        }
+       ]
+      },
+      {
+       "kanal": "Laporan Staf",
+       "judul": "Cadangan ikut terenkripsi",
+       "narasi": "Staf melaporkan NAS cadangan mingguan juga terkena enkripsi. Ternyata NAS selalu terpasang (mounted) di server file sepanjang hari.",
+       "pertanyaan": "Langkah pemulihan mana yang paling tepat?",
+       "opsi": [
+        {
+         "teks": "Amankan salinan cadangan off-site/offline yang belum terpasang, verifikasi integritasnya",
+         "skor": {
+          "deteksi": 3,
+          "containment": 4,
+          "eradikasi": 10,
+          "forensik": 4,
+          "pelaporan": 5,
+          "komando": 5
+         },
+         "baik": true,
+         "umpan": "Tepat. Cadangan offline adalah satu-satunya jalur pemulihan yang bersih."
+        },
+        {
+         "teks": "Format NAS lalu mulai dari nol",
+         "skor": {
+          "deteksi": 0,
+          "containment": 2,
+          "eradikasi": 3,
+          "forensik": 0,
+          "pelaporan": 2,
+          "komando": 1
+         },
+         "baik": false,
+         "umpan": "Merugikan. Menghapus potensi bukti dan data yang masih bisa diselamatkan."
+        },
+        {
+         "teks": "Bayar tebusan agar cepat selesai",
+         "skor": {
+          "deteksi": 0,
+          "containment": 0,
+          "eradikasi": 1,
+          "forensik": 0,
+          "pelaporan": 0,
+          "komando": 0
+         },
+         "baik": false,
+         "umpan": "Salah. Tidak menjamin pemulihan dan mendanai kejahatan."
+        },
+        {
+         "teks": "Pulihkan dari cadangan yang sama setelah server dibersihkan",
+         "skor": {
+          "deteksi": 1,
+          "containment": 3,
+          "eradikasi": 4,
+          "forensik": 2,
+          "pelaporan": 3,
+          "komando": 2
+         },
+         "baik": false,
+         "umpan": "Berisiko. Cadangan itu sudah tersentuh enkripsi dan bisa membawa sisa ancaman."
+        }
+       ]
+      },
+      {
+       "kanal": "Email",
+       "judul": "Email \"konfirmasi tagihan pengadaan\"",
+       "narasi": "Ditemukan email masuk ke {HOST} dari domain mirip mitra resmi, berisi tautan ke berkas \"INVOICE-PENGADAAN.pdf.exe\". Tiga penerima membuka lampiran.",
+       "pertanyaan": "Apa tindakan Anda?",
+       "opsi": [
+        {
+         "teks": "Blokir domain pengirim, tarik email dari semua kotak, periksa tiga penerima",
+         "skor": {
+          "deteksi": 7,
+          "containment": 7,
+          "eradikasi": 5,
+          "forensik": 4,
+          "pelaporan": 5,
+          "komando": 4
+         },
+         "baik": true,
+         "umpan": "Tepat. Tindakan menyeluruh: cegah penyebaran, bersihkan, dan telusuri korban."
+        },
+        {
+         "teks": "Hanya hapus email di kotak yang melapor",
+         "skor": {
+          "deteksi": 2,
+          "containment": 2,
+          "eradikasi": 1,
+          "forensik": 0,
+          "pelaporan": 2,
+          "komando": 1
+         },
+         "baik": false,
+         "umpan": "Kurang. Email yang sama masih ada di kotak lain."
+        },
+        {
+         "teks": "Kirim peringatan umum ke grup WhatsApp tanpa tindakan teknis",
+         "skor": {
+          "deteksi": 1,
+          "containment": 0,
+          "eradikasi": 0,
+          "forensik": 0,
+          "pelaporan": 4,
+          "komando": 3
+         },
+         "baik": false,
+         "umpan": "Sosialisasi bagus, tetapi akar masalah tidak ditangani."
+        },
+        {
+         "teks": "Blokir seluruh akses email keluar-masuk satuan",
+         "skor": {
+          "deteksi": 2,
+          "containment": 3,
+          "eradikasi": 0,
+          "forensik": 0,
+          "pelaporan": 2,
+          "komando": 1
+         },
+         "baik": false,
+         "umpan": "Berlebihan. Menghentikan komunikasi dinas tanpa kebutuhan."
+        }
+       ]
+      },
+      {
+       "kanal": "Dashboard Monitoring",
+       "judul": "Penghapusan shadow copy",
+       "narasi": "Log proses mencatat eksekusi vssadmin delete shadows /all /quiet pada {SRV} pukul 08.07, tiga menit sebelum enkripsi terdeteksi.",
+       "pertanyaan": "Apa nilai forensik dari temuan ini dan tindak lanjutnya?",
+       "opsi": [
+        {
+         "teks": "Simpan log dan image memori, jadikan dasar analisis linimasa, lalu telusuri akun pelaku",
+         "skor": {
+          "deteksi": 6,
+          "containment": 3,
+          "eradikasi": 3,
+          "forensik": 10,
+          "pelaporan": 6,
+          "komando": 4
+         },
+         "baik": true,
+         "umpan": "Tepat. Ini bukti kunci untuk menentukan jalur masuk dan akun yang disalahgunakan."
+        },
+        {
+         "teks": "Hapus log lama agar tidak memenuhi penyimpanan",
+         "skor": {
+          "deteksi": 0,
+          "containment": 0,
+          "eradikasi": 0,
+          "forensik": 0,
+          "pelaporan": 0,
+          "komando": 0
+         },
+         "baik": false,
+         "umpan": "Salah. Menghapus barang bukti dan melemahkan penyelidikan."
+        },
+        {
+         "teks": "Cukup catat di buku jaga harian",
+         "skor": {
+          "deteksi": 2,
+          "containment": 0,
+          "eradikasi": 0,
+          "forensik": 1,
+          "pelaporan": 4,
+          "komando": 2
+         },
+         "baik": false,
+         "umpan": "Tidak cukup. Bukti digital butuh pengamanan dan rantai pengawasan."
+        },
+        {
+         "teks": "Rekonstruksi dari ingatan staf saja",
+         "skor": {
+          "deteksi": 0,
+          "containment": 0,
+          "eradikasi": 0,
+          "forensik": 0,
+          "pelaporan": 1,
+          "komando": 0
+         },
+         "baik": false,
+         "umpan": "Salah. Kesaksian tanpa bukti teknis tidak dapat dipertanggungjawabkan."
+        }
+       ]
+      },
+      {
+       "kanal": "Rapat Staf",
+       "judul": "Tekanan pimpinan untuk cepat normal",
+       "narasi": "Pimpinan meminta layanan kembali normal dalam 4 jam karena ada kunjungan atasan. Tim baru menyelesaikan isolasi dan belum melakukan verifikasi kebersihan sistem.",
+       "pertanyaan": "Bagaimana Anda menyikapi tekanan ini?",
+       "opsi": [
+        {
+         "teks": "Sampaikan risiko tertulis, usulkan pemulihan bertahap pada layanan non-kritis lebih dulu",
+         "skor": {
+          "deteksi": 3,
+          "containment": 6,
+          "eradikasi": 5,
+          "forensik": 2,
+          "pelaporan": 8,
+          "komando": 10
+         },
+         "baik": true,
+         "umpan": "Tepat. Komando yang baik = berani menyampaikan risiko dengan solusi, bukan menolak atau menyerah."
+        },
+        {
+         "teks": "Turuti permintaan dan nyalakan semua layanan sekarang",
+         "skor": {
+          "deteksi": 0,
+          "containment": 0,
+          "eradikasi": 0,
+          "forensik": 0,
+          "pelaporan": 1,
+          "komando": 0
+         },
+         "baik": false,
+         "umpan": "Berbahaya. Sistem yang belum bersih berisiko terinfeksi ulang saat acara."
+        },
+        {
+         "teks": "Tolak tanpa penjelasan dan lanjutkan pekerjaan",
+         "skor": {
+          "deteksi": 1,
+          "containment": 3,
+          "eradikasi": 3,
+          "forensik": 0,
+          "pelaporan": 2,
+          "komando": 3
+         },
+         "baik": false,
+         "umpan": "Kurang. Penolakan tanpa komunikasi merusak kepercayaan komando."
+        },
+        {
+         "teks": "Serahkan keputusan sepenuhnya ke pimpinan",
+         "skor": {
+          "deteksi": 0,
+          "containment": 0,
+          "eradikasi": 0,
+          "forensik": 0,
+          "pelaporan": 1,
+          "komando": 0
+         },
+         "baik": false,
+         "umpan": "Salah. Perwira siber wajib memberi rekomendasi teknis, bukan melepas tanggung jawab."
+        }
+       ]
+      }
+     ]
+    },
+    "level": "menengah",
+    "levelNama": "Menengah",
+    "menit": 150,
+    "jumlahInject": 7,
+    "personel": "5–8",
+    "kategori": "Dukungan Teknologi / IT-OT",
+    "versi": "1.0"
+   },
+   "ringkasan": "Latihan tabletop menengah yang mensimulasikan kampanye RANSOM-93 — ransomware kriminal dengan motivasi pemerasan finansial — terhadap Pos Logistik di Bekasi, Jawa Barat. Peserta menghadapi 7 inject keputusan berurutan selama kurang lebih 150 menit, mulai dari indikasi awal hingga pelaporan resmi. Penilaian mencakup enam kompetensi: deteksi, penahanan, pemulihan, forensik, pelaporan, dan komando. Aset yang menjadi sasaran utama: data stok dan pengadaan, sistem inventori gudang, jalur distribusi.",
+   "objektif": [
+    "Mengenali indikasi RANSOM-93 pada lingkungan Pos Logistik sebelum berdampak luas.",
+    "Menerapkan urutan penanganan insiden: identifikasi, isolasi, pemulihan, pelaporan.",
+    "Mengambil keputusan komando pada tingkat kesulitan menengah dengan informasi yang tidak lengkap.",
+    "Mendokumentasikan barang bukti digital dan menyusun laporan insiden sesuai prosedur.",
+    "Menjaga kesinambungan layanan kritis selama penanganan insiden."
+   ],
+   "topologi": {
+    "nodes": [
+     {
+      "id": "inet",
+      "label": "INTERNET",
+      "tipe": "zona",
+      "tier": 0,
+      "aset": "Jalur publik",
+      "os": "—",
+      "risiko": "Tidak terbatas",
+      "catatan": "Satu-satunya jalur masuk dari luar"
+     },
+     {
+      "id": "edge",
+      "label": "RT-EDGE-01",
+      "tipe": "jaringan",
+      "tier": 1,
+      "aset": "Router / firewall tepi",
+      "os": "RouterOS / firmware",
+      "risiko": "Kredensial bawaan, aturan longgar",
+      "catatan": "Titik kontrol utama lalu lintas"
+     },
+     {
+      "id": "srv",
+      "label": "SRV-INVENTORI",
+      "tipe": "server",
+      "tier": 2,
+      "aset": "Server layanan internal",
+      "os": "Windows Server 2016",
+      "risiko": "Tambalan tertunda, SMB terbuka",
+      "catatan": "Menyimpan data operasional"
+     },
+     {
+      "id": "ot",
+      "label": "TIMBANGAN-DIGITAL-01",
+      "tipe": "ot",
+      "tier": 2,
+      "aset": "Perangkat operasional (OT)",
+      "os": "Firmware pabrikan",
+      "risiko": "Kata sandi bawaan, tanpa segmentasi",
+      "catatan": "Tidak boleh dipindai aktif"
+     },
+     {
+      "id": "host",
+      "label": "PC-ADM-01",
+      "tipe": "host",
+      "tier": 3,
+      "aset": "Workstation staf",
+      "os": "Windows 10 Pro",
+      "risiko": "Hak admin lokal, USB bebas",
+      "catatan": "Titik awal paling sering dikompromikan"
+     },
+     {
+      "id": "user",
+      "label": "PC-POSLOG-02",
+      "tipe": "host",
+      "tier": 3,
+      "aset": "Workstation pendukung",
+      "os": "Windows 10 Pro",
+      "risiko": "Antivirus tidak terkelola",
+      "catatan": "Berbagi folder dengan host lain"
+     },
+     {
+      "id": "periph",
+      "label": "PERANGKAT PENDUKUNG",
+      "tipe": "periferal",
+      "tier": 3,
+      "aset": "Printer jaringan, CCTV, AP",
+      "os": "Firmware",
+      "risiko": "Kata sandi bawaan, jarang diperbarui",
+      "catatan": "Sering terlupakan dalam inventaris"
+     }
+    ],
+    "links": [
+     [
+      "inet",
+      "edge"
+     ],
+     [
+      "edge",
+      "srv"
+     ],
+     [
+      "edge",
+      "ot"
+     ],
+     [
+      "edge",
+      "host"
+     ],
+     [
+      "edge",
+      "user"
+     ],
+     [
+      "host",
+      "periph"
+     ]
+    ]
+   },
+   "killchain": [
+    {
+     "fase": "Akses Awal",
+     "urutan": 1,
+     "teknik": [
+      {
+       "id": "T1566.002",
+       "nama": "Spearphishing Link"
+      },
+      {
+       "id": "T1078",
+       "nama": "Valid Accounts"
+      }
+     ],
+     "indikator": [
+      "Email \"tagihan pengadaan\" dari domain mirip",
+      "Login VPN di luar jam dinas"
+     ]
+    },
+    {
+     "fase": "Eksekusi",
+     "urutan": 2,
+     "teknik": [
+      {
+       "id": "T1204.002",
+       "nama": "Malicious File"
+      },
+      {
+       "id": "T1059.001",
+       "nama": "PowerShell"
+      }
+     ],
+     "indikator": [
+      "powershell -enc pada PC admin",
+      "File .lnk di folder berbagi"
+     ]
+    },
+    {
+     "fase": "Pemetaan",
+     "urutan": 3,
+     "teknik": [
+      {
+       "id": "T1046",
+       "nama": "Network Service Discovery"
+      },
+      {
+       "id": "T1021.002",
+       "nama": "SMB/Windows Admin Shares"
+      }
+     ],
+     "indikator": [
+      "Scan SMB 445 internal",
+      "Akses admin$ dari PC non-admin"
+     ]
+    },
+    {
+     "fase": "Dampak",
+     "urutan": 4,
+     "teknik": [
+      {
+       "id": "T1486",
+       "nama": "Data Encrypted for Impact"
+      },
+      {
+       "id": "T1490",
+       "nama": "Inhibit System Recovery"
+      }
+     ],
+     "indikator": [
+      "Ekstensi .r93 pada file",
+      "vssadmin delete shadows"
+     ]
+    }
+   ],
+   "injects": [
+    {
+     "id": "INJ-01",
+     "urutan": 1,
+     "jam": "08.10",
+     "kanal": "Telepon",
+     "judul": "Laporan staf: file tidak bisa dibuka",
+     "narasi": "Pukul 08.10 staf administrasi menelepon. Seluruh file di folder berbagi pada SRV-INVENTORI berubah nama dengan akhiran .r93 dan tidak bisa dibuka. Di layar muncul catatan tebusan berbahasa Indonesia dengan hitungan waktu 72 jam.",
+     "pertanyaan": "Apa dua tindakan pertama yang Anda perintahkan?",
+     "opsi": [
+      {
+       "id": "O1",
+       "teks": "Putuskan tautan jaringan server file dan matikan akses berbagi",
+       "skor": {
+        "deteksi": 2,
+        "containment": 10,
+        "eradikasi": 2,
+        "forensik": 1,
+        "pelaporan": 3,
+        "komando": 5
+       },
+       "baik": true,
+       "umpan": "Benar. Isolasi segera membatasi penyebaran ke PC lain."
+      },
+      {
+       "id": "O2",
+       "teks": "Minta staf mematikan PC masing-masing dan mencabut kabel LAN",
+       "skor": {
+        "deteksi": 2,
+        "containment": 7,
+        "eradikasi": 1,
+        "forensik": 1,
+        "pelaporan": 2,
+        "komando": 3
+       },
+       "baik": true,
+       "umpan": "Cukup baik, tetapi tanpa koordinasi bisa menghapus bukti di memori."
+      },
+      {
+       "id": "O3",
+       "teks": "Restart server untuk melihat apakah masalah hilang",
+       "skor": {
+        "deteksi": 0,
+        "containment": 0,
+        "eradikasi": 0,
+        "forensik": 0,
+        "pelaporan": 0,
+        "komando": 0
+       },
+       "baik": false,
+       "umpan": "Salah. Restart mempercepat enkripsi dan menghapus jejak memori."
+      },
+      {
+       "id": "O4",
+       "teks": "Hubungi nomor pada catatan tebusan untuk menegosiasi",
+       "skor": {
+        "deteksi": 0,
+        "containment": 0,
+        "eradikasi": 0,
+        "forensik": 0,
+        "pelaporan": 1,
+        "komando": 0
+       },
+       "baik": false,
+       "umpan": "Salah. Ini melanggar prosedur dan membuka jalur komunikasi dengan pelaku."
+      }
+     ]
+    },
+    {
+     "id": "INJ-02",
+     "urutan": 2,
+     "jam": "08.28",
+     "kanal": "Dashboard Monitoring",
+     "judul": "Trafik SMB masif antar-PC",
+     "narasi": "Sensor jaringan mencatat lonjakan koneksi SMB (port 445) dari PC-ADM-01 ke enam PC lain dalam dua menit. Pola ini tidak pernah terjadi sebelumnya.",
+     "pertanyaan": "Apa yang Anda lakukan dengan temuan ini?",
+     "opsi": [
+      {
+       "id": "O1",
+       "teks": "Blokir SMB antar-workstation di firewall dan catat sumbernya",
+       "skor": {
+        "deteksi": 8,
+        "containment": 8,
+        "eradikasi": 2,
+        "forensik": 3,
+        "pelaporan": 4,
+        "komando": 4
+       },
+       "baik": true,
+       "umpan": "Tepat. Deteksi dini plus penahanan langsung di titik penyebaran."
+      },
+      {
+       "id": "O2",
+       "teks": "Laporkan ke atasan lalu tunggu instruksi",
+       "skor": {
+        "deteksi": 4,
+        "containment": 0,
+        "eradikasi": 0,
+        "forensik": 1,
+        "pelaporan": 6,
+        "komando": 2
+       },
+       "baik": false,
+       "umpan": "Setengah benar. Pelaporan penting, tetapi penundaan memberi pelaku waktu."
+      },
+      {
+       "id": "O3",
+       "teks": "Matikan seluruh jaringan satuan",
+       "skor": {
+        "deteksi": 3,
+        "containment": 6,
+        "eradikasi": 0,
+        "forensik": 0,
+        "pelaporan": 2,
+        "komando": 1
+       },
+       "baik": false,
+       "umpan": "Terlalu agresif. Menghentikan seluruh operasi tanpa dasar yang cukup."
+      },
+      {
+       "id": "O4",
+       "teks": "Abaikan karena trafik internal dianggap normal",
+       "skor": {
+        "deteksi": 0,
+        "containment": 0,
+        "eradikasi": 0,
+        "forensik": 0,
+        "pelaporan": 0,
+        "komando": 0
+       },
+       "baik": false,
+       "umpan": "Salah. Ini justru sinyal penyebaran lateral paling jelas."
+      }
+     ]
+    },
+    {
+     "id": "INJ-03",
+     "urutan": 3,
+     "jam": "08.46",
+     "kanal": "Laporan Staf",
+     "judul": "Cadangan ikut terenkripsi",
+     "narasi": "Staf melaporkan NAS cadangan mingguan juga terkena enkripsi. Ternyata NAS selalu terpasang (mounted) di server file sepanjang hari.",
+     "pertanyaan": "Langkah pemulihan mana yang paling tepat?",
+     "opsi": [
+      {
+       "id": "O1",
+       "teks": "Amankan salinan cadangan off-site/offline yang belum terpasang, verifikasi integritasnya",
+       "skor": {
+        "deteksi": 3,
+        "containment": 4,
+        "eradikasi": 10,
+        "forensik": 4,
+        "pelaporan": 5,
+        "komando": 5
+       },
+       "baik": true,
+       "umpan": "Tepat. Cadangan offline adalah satu-satunya jalur pemulihan yang bersih."
+      },
+      {
+       "id": "O2",
+       "teks": "Format NAS lalu mulai dari nol",
+       "skor": {
+        "deteksi": 0,
+        "containment": 2,
+        "eradikasi": 3,
+        "forensik": 0,
+        "pelaporan": 2,
+        "komando": 1
+       },
+       "baik": false,
+       "umpan": "Merugikan. Menghapus potensi bukti dan data yang masih bisa diselamatkan."
+      },
+      {
+       "id": "O3",
+       "teks": "Bayar tebusan agar cepat selesai",
+       "skor": {
+        "deteksi": 0,
+        "containment": 0,
+        "eradikasi": 1,
+        "forensik": 0,
+        "pelaporan": 0,
+        "komando": 0
+       },
+       "baik": false,
+       "umpan": "Salah. Tidak menjamin pemulihan dan mendanai kejahatan."
+      },
+      {
+       "id": "O4",
+       "teks": "Pulihkan dari cadangan yang sama setelah server dibersihkan",
+       "skor": {
+        "deteksi": 1,
+        "containment": 3,
+        "eradikasi": 4,
+        "forensik": 2,
+        "pelaporan": 3,
+        "komando": 2
+       },
+       "baik": false,
+       "umpan": "Berisiko. Cadangan itu sudah tersentuh enkripsi dan bisa membawa sisa ancaman."
+      }
+     ]
+    },
+    {
+     "id": "INJ-04",
+     "urutan": 4,
+     "jam": "09.04",
+     "kanal": "Email",
+     "judul": "Email \"konfirmasi tagihan pengadaan\"",
+     "narasi": "Ditemukan email masuk ke PC-ADM-01 dari domain mirip mitra resmi, berisi tautan ke berkas \"INVOICE-PENGADAAN.pdf.exe\". Tiga penerima membuka lampiran.",
+     "pertanyaan": "Apa tindakan Anda?",
+     "opsi": [
+      {
+       "id": "O1",
+       "teks": "Blokir domain pengirim, tarik email dari semua kotak, periksa tiga penerima",
+       "skor": {
+        "deteksi": 7,
+        "containment": 7,
+        "eradikasi": 5,
+        "forensik": 4,
+        "pelaporan": 5,
+        "komando": 4
+       },
+       "baik": true,
+       "umpan": "Tepat. Tindakan menyeluruh: cegah penyebaran, bersihkan, dan telusuri korban."
+      },
+      {
+       "id": "O2",
+       "teks": "Hanya hapus email di kotak yang melapor",
+       "skor": {
+        "deteksi": 2,
+        "containment": 2,
+        "eradikasi": 1,
+        "forensik": 0,
+        "pelaporan": 2,
+        "komando": 1
+       },
+       "baik": false,
+       "umpan": "Kurang. Email yang sama masih ada di kotak lain."
+      },
+      {
+       "id": "O3",
+       "teks": "Kirim peringatan umum ke grup WhatsApp tanpa tindakan teknis",
+       "skor": {
+        "deteksi": 1,
+        "containment": 0,
+        "eradikasi": 0,
+        "forensik": 0,
+        "pelaporan": 4,
+        "komando": 3
+       },
+       "baik": false,
+       "umpan": "Sosialisasi bagus, tetapi akar masalah tidak ditangani."
+      },
+      {
+       "id": "O4",
+       "teks": "Blokir seluruh akses email keluar-masuk satuan",
+       "skor": {
+        "deteksi": 2,
+        "containment": 3,
+        "eradikasi": 0,
+        "forensik": 0,
+        "pelaporan": 2,
+        "komando": 1
+       },
+       "baik": false,
+       "umpan": "Berlebihan. Menghentikan komunikasi dinas tanpa kebutuhan."
+      }
+     ]
+    },
+    {
+     "id": "INJ-05",
+     "urutan": 5,
+     "jam": "09.22",
+     "kanal": "Dashboard Monitoring",
+     "judul": "Penghapusan shadow copy",
+     "narasi": "Log proses mencatat eksekusi vssadmin delete shadows /all /quiet pada SRV-INVENTORI pukul 08.07, tiga menit sebelum enkripsi terdeteksi.",
+     "pertanyaan": "Apa nilai forensik dari temuan ini dan tindak lanjutnya?",
+     "opsi": [
+      {
+       "id": "O1",
+       "teks": "Simpan log dan image memori, jadikan dasar analisis linimasa, lalu telusuri akun pelaku",
+       "skor": {
+        "deteksi": 6,
+        "containment": 3,
+        "eradikasi": 3,
+        "forensik": 10,
+        "pelaporan": 6,
+        "komando": 4
+       },
+       "baik": true,
+       "umpan": "Tepat. Ini bukti kunci untuk menentukan jalur masuk dan akun yang disalahgunakan."
+      },
+      {
+       "id": "O2",
+       "teks": "Hapus log lama agar tidak memenuhi penyimpanan",
+       "skor": {
+        "deteksi": 0,
+        "containment": 0,
+        "eradikasi": 0,
+        "forensik": 0,
+        "pelaporan": 0,
+        "komando": 0
+       },
+       "baik": false,
+       "umpan": "Salah. Menghapus barang bukti dan melemahkan penyelidikan."
+      },
+      {
+       "id": "O3",
+       "teks": "Cukup catat di buku jaga harian",
+       "skor": {
+        "deteksi": 2,
+        "containment": 0,
+        "eradikasi": 0,
+        "forensik": 1,
+        "pelaporan": 4,
+        "komando": 2
+       },
+       "baik": false,
+       "umpan": "Tidak cukup. Bukti digital butuh pengamanan dan rantai pengawasan."
+      },
+      {
+       "id": "O4",
+       "teks": "Rekonstruksi dari ingatan staf saja",
+       "skor": {
+        "deteksi": 0,
+        "containment": 0,
+        "eradikasi": 0,
+        "forensik": 0,
+        "pelaporan": 1,
+        "komando": 0
+       },
+       "baik": false,
+       "umpan": "Salah. Kesaksian tanpa bukti teknis tidak dapat dipertanggungjawabkan."
+      }
+     ]
+    },
+    {
+     "id": "INJ-06",
+     "urutan": 6,
+     "jam": "09.40",
+     "kanal": "Rapat Staf",
+     "judul": "Tekanan pimpinan untuk cepat normal",
+     "narasi": "Pimpinan meminta layanan kembali normal dalam 4 jam karena ada kunjungan atasan. Tim baru menyelesaikan isolasi dan belum melakukan verifikasi kebersihan sistem.",
+     "pertanyaan": "Bagaimana Anda menyikapi tekanan ini?",
+     "opsi": [
+      {
+       "id": "O1",
+       "teks": "Sampaikan risiko tertulis, usulkan pemulihan bertahap pada layanan non-kritis lebih dulu",
+       "skor": {
+        "deteksi": 3,
+        "containment": 6,
+        "eradikasi": 5,
+        "forensik": 2,
+        "pelaporan": 8,
+        "komando": 10
+       },
+       "baik": true,
+       "umpan": "Tepat. Komando yang baik = berani menyampaikan risiko dengan solusi, bukan menolak atau menyerah."
+      },
+      {
+       "id": "O2",
+       "teks": "Turuti permintaan dan nyalakan semua layanan sekarang",
+       "skor": {
+        "deteksi": 0,
+        "containment": 0,
+        "eradikasi": 0,
+        "forensik": 0,
+        "pelaporan": 1,
+        "komando": 0
+       },
+       "baik": false,
+       "umpan": "Berbahaya. Sistem yang belum bersih berisiko terinfeksi ulang saat acara."
+      },
+      {
+       "id": "O3",
+       "teks": "Tolak tanpa penjelasan dan lanjutkan pekerjaan",
+       "skor": {
+        "deteksi": 1,
+        "containment": 3,
+        "eradikasi": 3,
+        "forensik": 0,
+        "pelaporan": 2,
+        "komando": 3
+       },
+       "baik": false,
+       "umpan": "Kurang. Penolakan tanpa komunikasi merusak kepercayaan komando."
+      },
+      {
+       "id": "O4",
+       "teks": "Serahkan keputusan sepenuhnya ke pimpinan",
+       "skor": {
+        "deteksi": 0,
+        "containment": 0,
+        "eradikasi": 0,
+        "forensik": 0,
+        "pelaporan": 1,
+        "komando": 0
+       },
+       "baik": false,
+       "umpan": "Salah. Perwira siber wajib memberi rekomendasi teknis, bukan melepas tanggung jawab."
+      }
+     ]
+    },
+    {
+     "id": "INJ-07",
+     "urutan": 7,
+     "jam": "09.58",
+     "kanal": "Rapat Staf",
+     "judul": "Keputusan sulit: matikan layanan kritis",
+     "narasi": "Analisis menunjukkan ancaman masih aktif pada SRV-INVENTORI. Untuk membersihkan menyeluruh, layanan harus dimatikan 6 jam pada jam kerja.",
+     "pertanyaan": "Apa keputusan Anda?",
+     "opsi": [
+      {
+       "id": "O1",
+       "teks": "Ajukan keputusan ke pimpinan dengan opsi, risiko, dan rencana komunikasi pengguna",
+       "skor": {
+        "deteksi": 3,
+        "containment": 5,
+        "eradikasi": 6,
+        "forensik": 2,
+        "pelaporan": 9,
+        "komando": 10
+       },
+       "baik": true,
+       "umpan": "Tepat. Keputusan berdampak operasional harus melalui komando dengan opsi jelas."
+      },
+      {
+       "id": "O2",
+       "teks": "Matikan sendiri tanpa memberi tahu",
+       "skor": {
+        "deteksi": 2,
+        "containment": 5,
+        "eradikasi": 5,
+        "forensik": 0,
+        "pelaporan": 1,
+        "komando": 1
+       },
+       "baik": false,
+       "umpan": "Salah. Melampaui kewenangan dan memicu kebingungan."
+      },
+      {
+       "id": "O3",
+       "teks": "Tunda pembersihan sampai akhir pekan",
+       "skor": {
+        "deteksi": 1,
+        "containment": 2,
+        "eradikasi": 1,
+        "forensik": 0,
+        "pelaporan": 3,
+        "komando": 2
+       },
+       "baik": false,
+       "umpan": "Berisiko. Ancaman aktif selama berhari-hari."
+      },
+      {
+       "id": "O4",
+       "teks": "Biarkan layanan jalan sambil membersihkan sebagian",
+       "skor": {
+        "deteksi": 2,
+        "containment": 3,
+        "eradikasi": 2,
+        "forensik": 0,
+        "pelaporan": 2,
+        "komando": 2
+       },
+       "baik": false,
+       "umpan": "Berisiko. Pembersihan separuh bisa meninggalkan persistence."
+      }
+     ]
+    }
+   ],
+   "rubrik": [
+    {
+     "id": "deteksi",
+     "nama": "Deteksi",
+     "bobot": 20,
+     "deskripsi": "Kemampuan menemukan jejak serangan lebih awal",
+     "kriteria": [
+      {
+       "level": "Kurang",
+       "deskripsi": "Belum menunjukkan tindakan deteksi yang relevan."
+      },
+      {
+       "level": "Cukup",
+       "deskripsi": "Menunjukkan deteksi dasar namun tidak lengkap atau terlambat."
+      },
+      {
+       "level": "Baik",
+       "deskripsi": "Menunjukkan deteksi tepat pada sebagian besar kesempatan."
+      },
+      {
+       "level": "Sangat Baik",
+       "deskripsi": "Konsisten, terukur, dan sesuai prosedur pada seluruh kesempatan."
+      }
+     ]
+    },
+    {
+     "id": "containment",
+     "nama": "Penahanan",
+     "bobot": 20,
+     "deskripsi": "Isolasi dan pembatasan dampak insiden",
+     "kriteria": [
+      {
+       "level": "Kurang",
+       "deskripsi": "Belum menunjukkan tindakan penahanan yang relevan."
+      },
+      {
+       "level": "Cukup",
+       "deskripsi": "Menunjukkan penahanan dasar namun tidak lengkap atau terlambat."
+      },
+      {
+       "level": "Baik",
+       "deskripsi": "Menunjukkan penahanan tepat pada sebagian besar kesempatan."
+      },
+      {
+       "level": "Sangat Baik",
+       "deskripsi": "Konsisten, terukur, dan sesuai prosedur pada seluruh kesempatan."
+      }
+     ]
+    },
+    {
+     "id": "eradikasi",
+     "nama": "Pemulihan",
+     "bobot": 15,
+     "deskripsi": "Pembersihan ancaman dan pemulihan layanan",
+     "kriteria": [
+      {
+       "level": "Kurang",
+       "deskripsi": "Belum menunjukkan tindakan pemulihan yang relevan."
+      },
+      {
+       "level": "Cukup",
+       "deskripsi": "Menunjukkan pemulihan dasar namun tidak lengkap atau terlambat."
+      },
+      {
+       "level": "Baik",
+       "deskripsi": "Menunjukkan pemulihan tepat pada sebagian besar kesempatan."
+      },
+      {
+       "level": "Sangat Baik",
+       "deskripsi": "Konsisten, terukur, dan sesuai prosedur pada seluruh kesempatan."
+      }
+     ]
+    },
+    {
+     "id": "forensik",
+     "nama": "Forensik",
+     "bobot": 15,
+     "deskripsi": "Pengumpulan dan pengamanan barang bukti digital",
+     "kriteria": [
+      {
+       "level": "Kurang",
+       "deskripsi": "Belum menunjukkan tindakan forensik yang relevan."
+      },
+      {
+       "level": "Cukup",
+       "deskripsi": "Menunjukkan forensik dasar namun tidak lengkap atau terlambat."
+      },
+      {
+       "level": "Baik",
+       "deskripsi": "Menunjukkan forensik tepat pada sebagian besar kesempatan."
+      },
+      {
+       "level": "Sangat Baik",
+       "deskripsi": "Konsisten, terukur, dan sesuai prosedur pada seluruh kesempatan."
+      }
+     ]
+    },
+    {
+     "id": "pelaporan",
+     "nama": "Pelaporan",
+     "bobot": 15,
+     "deskripsi": "Dokumentasi, eskalasi, dan pelaporan resmi",
+     "kriteria": [
+      {
+       "level": "Kurang",
+       "deskripsi": "Belum menunjukkan tindakan pelaporan yang relevan."
+      },
+      {
+       "level": "Cukup",
+       "deskripsi": "Menunjukkan pelaporan dasar namun tidak lengkap atau terlambat."
+      },
+      {
+       "level": "Baik",
+       "deskripsi": "Menunjukkan pelaporan tepat pada sebagian besar kesempatan."
+      },
+      {
+       "level": "Sangat Baik",
+       "deskripsi": "Konsisten, terukur, dan sesuai prosedur pada seluruh kesempatan."
+      }
+     ]
+    },
+    {
+     "id": "komando",
+     "nama": "Komando",
+     "bobot": 15,
+     "deskripsi": "Pengambilan keputusan, koordinasi, dan disiplin prosedur",
+     "kriteria": [
+      {
+       "level": "Kurang",
+       "deskripsi": "Belum menunjukkan tindakan komando yang relevan."
+      },
+      {
+       "level": "Cukup",
+       "deskripsi": "Menunjukkan komando dasar namun tidak lengkap atau terlambat."
+      },
+      {
+       "level": "Baik",
+       "deskripsi": "Menunjukkan komando tepat pada sebagian besar kesempatan."
+      },
+      {
+       "level": "Sangat Baik",
+       "deskripsi": "Konsisten, terukur, dan sesuai prosedur pada seluruh kesempatan."
+      }
+     ]
+    }
+   ],
+   "ioc": [
+    {
+     "tipe": "Domain",
+     "nilai": "cdn-pembaruan-klik[.]top",
+     "keterangan": "Domain unduhan muatan tahap kedua"
+    },
+    {
+     "tipe": "IP",
+     "nilai": "103.44.21[.]87",
+     "keterangan": "Alamat kendali yang menghubungi host admin"
+    },
+    {
+     "tipe": "SHA256",
+     "nilai": "a3f1c9e0b7d2486c5e9a1f0d3b8c7e6a5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a",
+     "keterangan": "Sampel pengenkripsi (fiktif)"
+    },
+    {
+     "tipe": "Nama File",
+     "nilai": "INVOICE-PENGADAAN.pdf.exe",
+     "keterangan": "Lampiran email phishing"
+    },
+    {
+     "tipe": "Proses",
+     "nilai": "vssadmin delete shadows /all /quiet",
+     "keterangan": "Penghapusan cadangan bayangan"
+    }
+   ],
+   "mitre": [
+    {
+     "id": "T1566.002",
+     "nama": "Spearphishing Link"
+    },
+    {
+     "id": "T1078",
+     "nama": "Valid Accounts"
+    },
+    {
+     "id": "T1204.002",
+     "nama": "Malicious File"
+    },
+    {
+     "id": "T1059.001",
+     "nama": "PowerShell"
+    },
+    {
+     "id": "T1046",
+     "nama": "Network Service Discovery"
+    },
+    {
+     "id": "T1021.002",
+     "nama": "SMB/Windows Admin Shares"
+    },
+    {
+     "id": "T1486",
+     "nama": "Data Encrypted for Impact"
+    },
+    {
+     "id": "T1490",
+     "nama": "Inhibit System Recovery"
+    }
+   ],
+   "fasilitator": {
+    "persiapan": [
+     "Siapkan ruang dengan satu layar utama dan satu layar skor.",
+     "Cetak buku peserta dan lembar keputusan untuk 5–8 peserta.",
+     "Pastikan tidak ada akses internet ke sistem nyata. Seluruh inject bersifat simulasi.",
+     "Tunjuk satu pencatat waktu dan satu penilai independen.",
+     "Ingatkan peserta: perangkat OT (TIMBANGAN-DIGITAL-01) tidak boleh dipindai aktif dalam latihan."
+    ],
+    "jalankan": [
+     "Bacakan narasi inject apa adanya. Jangan menambah petunjuk.",
+     "Beri waktu diskusi 3–5 menit, lalu minta keputusan tertulis.",
+     "Catat pilihan peserta, bukan hanya jawaban lisan.",
+     "Umpan balik diberikan setelah keputusan dicatat, bukan sebelumnya.",
+     "Jaga agar tekanan waktu terasa: tampilkan hitungan waktu."
+    ],
+    "aturan": [
+     "Tidak ada jawaban tunggal yang sempurna; yang dinilai adalah alasan dan urutan tindakan.",
+     "Peserta boleh bertanya, tetapi fasilitator hanya menjawab sesuai informasi pada inject.",
+     "Keputusan yang melanggar prosedur tetap dicatat sebagai bagian penilaian komando.",
+     "Setiap sesi diakhiri dengan After Action Review, bukan dengan mencari kesalahan individu."
+    ],
+    "pertanyaanDiskusi": [
+     "Pada inject mana informasi paling tidak lengkap, dan bagaimana Anda memutuskan?",
+     "Tindakan mana yang paling berhasil menahan dampak?",
+     "Apa yang akan Anda ubah bila kejadian serupa terjadi minggu depan?",
+     "Siapa yang harus dilibatkan lebih awal dalam rantai komando?"
+    ]
+   },
+   "prasyarat": [
+    "Peserta memahami prosedur pelaporan insiden satuan.",
+    "Fasilitator menyiapkan lembar keputusan dan papan skor.",
+    "Tidak diperlukan perangkat lunak khusus untuk mode tabletop.",
+    "Untuk mode lab: satu host dengan Docker, jaringan terisolasi, tanpa akses internet."
+   ],
+   "biaya": {
+    "modeTabletop": "Rp 0 — tanpa perangkat tambahan",
+    "modeLab": "Rp 0 — memakai perangkat yang sudah ada (Docker pada 1 laptop)",
+    "estimasiWaktuPersiapan": "45 menit"
+   }
+  }
+ ],
+ "sesi": [
+  {
+   "id": "SES-MWHW1CNW",
+   "paketId": "PKT-MWHW1CNV4",
+   "paketSatuan": "poslog",
+   "satuanNama": "Pos Logistik",
+   "aktorNama": "RANSOM-93",
+   "level": "Menengah",
+   "tim": "Tim Siber Pos Logistik",
+   "mulai": "2026-11-15T13:46:20.636Z",
+   "jawaban": {
+    "INJ-01": [
+     "O1",
+     "O2"
+    ],
+    "INJ-02": [
+     "O1"
+    ],
+    "INJ-03": [
+     "O4"
+    ],
+    "INJ-04": [
+     "O1"
+    ],
+    "INJ-05": [
+     "O3"
+    ],
+    "INJ-06": [
+     "O1"
+    ],
+    "INJ-07": [
+     "O1"
+    ]
+   },
+   "aar": {
+    "readiness": 80,
+    "grade": "CUKUP SIAP",
+    "skorKompetensi": [
+     {
+      "id": "deteksi",
+      "nama": "Deteksi",
+      "bobot": 20,
+      "deskripsi": "Kemampuan menemukan jejak serangan lebih awal",
+      "nilai": 81
+     },
+     {
+      "id": "containment",
+      "nama": "Penahanan",
+      "bobot": 20,
+      "deskripsi": "Isolasi dan pembatasan dampak insiden",
+      "nilai": 91
+     },
+     {
+      "id": "eradikasi",
+      "nama": "Pemulihan",
+      "bobot": 15,
+      "deskripsi": "Pembersihan ancaman dan pemulihan layanan",
+      "nilai": 73
+     },
+     {
+      "id": "forensik",
+      "nama": "Forensik",
+      "bobot": 15,
+      "deskripsi": "Pengumpulan dan pengamanan barang bukti digital",
+      "nilai": 58
+     },
+     {
+      "id": "pelaporan",
+      "nama": "Pelaporan",
+      "bobot": 15,
+      "deskripsi": "Dokumentasi, eskalasi, dan pelaporan resmi",
+      "nilai": 86
+     },
+     {
+      "id": "komando",
+      "nama": "Komando",
+      "bobot": 15,
+      "deskripsi": "Pengambilan keputusan, koordinasi, dan disiplin prosedur",
+      "nilai": 88
+     }
+    ],
+    "rincian": [
+     {
+      "id": "INJ-01",
+      "judul": "Laporan staf: file tidak bisa dibuka",
+      "kanal": "Telepon",
+      "status": "TEPAT",
+      "dipilih": [
+       "Putuskan tautan jaringan server file dan matikan akses berbagi",
+       "Minta staf mematikan PC masing-masing dan mencabut kabel LAN"
+      ],
+      "skor": {
+       "deteksi": 4,
+       "containment": 17,
+       "eradikasi": 3,
+       "forensik": 2,
+       "pelaporan": 5,
+       "komando": 8
+      },
+      "umpan": [
+       "Benar. Isolasi segera membatasi penyebaran ke PC lain.",
+       "Cukup baik, tetapi tanpa koordinasi bisa menghapus bukti di memori."
+      ],
+      "terbaik": [
+       "Putuskan tautan jaringan server file dan matikan akses berbagi",
+       "Minta staf mematikan PC masing-masing dan mencabut kabel LAN"
+      ]
+     },
+     {
+      "id": "INJ-02",
+      "judul": "Trafik SMB masif antar-PC",
+      "kanal": "Dashboard Monitoring",
+      "status": "TEPAT",
+      "dipilih": [
+       "Blokir SMB antar-workstation di firewall dan catat sumbernya"
+      ],
+      "skor": {
+       "deteksi": 8,
+       "containment": 8,
+       "eradikasi": 2,
+       "forensik": 3,
+       "pelaporan": 4,
+       "komando": 4
+      },
+      "umpan": [
+       "Tepat. Deteksi dini plus penahanan langsung di titik penyebaran."
+      ],
+      "terbaik": [
+       "Blokir SMB antar-workstation di firewall dan catat sumbernya"
+      ]
+     },
+     {
+      "id": "INJ-03",
+      "judul": "Cadangan ikut terenkripsi",
+      "kanal": "Laporan Staf",
+      "status": "KURANG",
+      "dipilih": [
+       "Pulihkan dari cadangan yang sama setelah server dibersihkan"
+      ],
+      "skor": {
+       "deteksi": 1,
+       "containment": 3,
+       "eradikasi": 4,
+       "forensik": 2,
+       "pelaporan": 3,
+       "komando": 2
+      },
+      "umpan": [
+       "Berisiko. Cadangan itu sudah tersentuh enkripsi dan bisa membawa sisa ancaman."
+      ],
+      "terbaik": [
+       "Amankan salinan cadangan off-site/offline yang belum terpasang, verifikasi integritasnya"
+      ]
+     },
+     {
+      "id": "INJ-04",
+      "judul": "Email \"konfirmasi tagihan pengadaan\"",
+      "kanal": "Email",
+      "status": "TEPAT",
+      "dipilih": [
+       "Blokir domain pengirim, tarik email dari semua kotak, periksa tiga penerima"
+      ],
+      "skor": {
+       "deteksi": 7,
+       "containment": 7,
+       "eradikasi": 5,
+       "forensik": 4,
+       "pelaporan": 5,
+       "komando": 4
+      },
+      "umpan": [
+       "Tepat. Tindakan menyeluruh: cegah penyebaran, bersihkan, dan telusuri korban."
+      ],
+      "terbaik": [
+       "Blokir domain pengirim, tarik email dari semua kotak, periksa tiga penerima"
+      ]
+     },
+     {
+      "id": "INJ-05",
+      "judul": "Penghapusan shadow copy",
+      "kanal": "Dashboard Monitoring",
+      "status": "KURANG",
+      "dipilih": [
+       "Cukup catat di buku jaga harian"
+      ],
+      "skor": {
+       "deteksi": 2,
+       "containment": 0,
+       "eradikasi": 0,
+       "forensik": 1,
+       "pelaporan": 4,
+       "komando": 2
+      },
+      "umpan": [
+       "Tidak cukup. Bukti digital butuh pengamanan dan rantai pengawasan."
+      ],
+      "terbaik": [
+       "Simpan log dan image memori, jadikan dasar analisis linimasa, lalu telusuri akun pelaku"
+      ]
+     },
+     {
+      "id": "INJ-06",
+      "judul": "Tekanan pimpinan untuk cepat normal",
+      "kanal": "Rapat Staf",
+      "status": "TEPAT",
+      "dipilih": [
+       "Sampaikan risiko tertulis, usulkan pemulihan bertahap pada layanan non-kritis lebih dulu"
+      ],
+      "skor": {
+       "deteksi": 3,
+       "containment": 6,
+       "eradikasi": 5,
+       "forensik": 2,
+       "pelaporan": 8,
+       "komando": 10
+      },
+      "umpan": [
+       "Tepat. Komando yang baik = berani menyampaikan risiko dengan solusi, bukan menolak atau menyerah."
+      ],
+      "terbaik": [
+       "Sampaikan risiko tertulis, usulkan pemulihan bertahap pada layanan non-kritis lebih dulu"
+      ]
+     },
+     {
+      "id": "INJ-07",
+      "judul": "Keputusan sulit: matikan layanan kritis",
+      "kanal": "Rapat Staf",
+      "status": "TEPAT",
+      "dipilih": [
+       "Ajukan keputusan ke pimpinan dengan opsi, risiko, dan rencana komunikasi pengguna"
+      ],
+      "skor": {
+       "deteksi": 3,
+       "containment": 5,
+       "eradikasi": 6,
+       "forensik": 2,
+       "pelaporan": 9,
+       "komando": 10
+      },
+      "umpan": [
+       "Tepat. Keputusan berdampak operasional harus melalui komando dengan opsi jelas."
+      ],
+      "terbaik": [
+       "Ajukan keputusan ke pimpinan dengan opsi, risiko, dan rencana komunikasi pengguna"
+      ]
+     }
+    ],
+    "kuat": [
+     {
+      "nama": "Penahanan",
+      "nilai": 91,
+      "deskripsi": "Isolasi dan pembatasan dampak insiden"
+     },
+     {
+      "nama": "Komando",
+      "nilai": 88,
+      "deskripsi": "Pengambilan keputusan, koordinasi, dan disiplin prosedur"
+     }
+    ],
+    "lemah": [
+     {
+      "nama": "Forensik",
+      "nilai": 58,
+      "deskripsi": "Pengumpulan dan pengamanan barang bukti digital"
+     },
+     {
+      "nama": "Pemulihan",
+      "nilai": 73,
+      "deskripsi": "Pembersihan ancaman dan pemulihan layanan"
+     }
+    ],
+    "rekomendasi": [
+     {
+      "kompetensi": "Forensik",
+      "nilai": 58,
+      "saran": "Standarkan pengambilan barang bukti: hash, catatan waktu, rantai pengawasan. Sediakan satu perangkat khusus analisis yang tidak dipakai kerja harian."
+     },
+     {
+      "kompetensi": "Pemulihan",
+      "nilai": 73,
+      "saran": "Susun prosedur pemulihan bertahap dengan urutan layanan prioritas. Uji pemulihan dari cadangan offline minimal sekali per kuartal."
+     }
+    ],
+    "jumlahInject": 7,
+    "dijawab": 7
+   },
+   "selesai": true,
+   "indeks": 7,
+   "selesaiPada": "2026-11-15T13:46:20.645Z"
+  }
+ ]
+}

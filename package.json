@@ -1,0 +1,12 @@
+{
+  "name": "latma-siber",
+  "version": "1.0.0",
+  "description": "Platform latihan dan pengukuran kesiapan siber satuan — berjalan on-premise tanpa internet.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

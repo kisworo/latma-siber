@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>LATMA SIBER — Deck</title>
+<style>
+  :root {
+    --bg: #060907; --panel: #0b1210; --line: #1c2b24; --line2: #2a4438;
+    --text: #e8f0ea; --muted: #8fa79a; --dim: #5f776c;
+    --green: #57e08c; --amber: #e3b45c; --red: #ff6a58;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: #111; font-family: var(--sans); color: var(--text); }
+
+  .slide {
+    width: 1280px; height: 720px; position: relative; overflow: hidden;
+    background: var(--bg); padding: 64px 72px; page-break-after: always; break-after: page;
+    display: flex; flex-direction: column;
+  }
+  .slide::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(87,224,140,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(87,224,140,.03) 1px, transparent 1px);
+    background-size: 46px 46px; pointer-events: none;
+    mask-image: radial-gradient(ellipse 80% 70% at 40% 0%, #000 10%, transparent 80%);
+  }
+  .slide::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 55% 45% at 15% -10%, rgba(87,224,140,.09), transparent 70%);
+    pointer-events: none;
+  }
+  .slide > * { position: relative; z-index: 2; }
+
+  .kicker { font-family: var(--mono); font-size: 12px; letter-spacing: .26em; color: var(--green); text-transform: uppercase; display: flex; align-items: center; gap: 12px; }
+  .kicker::before { content: ""; width: 26px; height: 1px; background: var(--green); opacity: .7; }
+  .num { position: absolute; top: 56px; right: 72px; font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: .2em; z-index: 3; }
+
+  h1 { font-size: 74px; line-height: 1.02; letter-spacing: -.035em; font-weight: 700; }
+  h2 { font-size: 40px; line-height: 1.12; letter-spacing: -.02em; font-weight: 650; }
+  h3 { font-size: 19px; font-weight: 600; }
+  p { font-size: 17px; line-height: 1.6; color: var(--muted); }
+  .lead { font-size: 21px; line-height: 1.5; color: var(--muted); max-width: 760px; }
+  em { font-style: normal; color: var(--green); }
+
+  .cover { justify-content: center; }
+  .cover h1 { font-size: 108px; letter-spacing: -.045em; margin: 18px 0 20px; }
+  .cover .sub { font-size: 23px; color: var(--muted); max-width: 690px; line-height: 1.45; }
+  .cover-art { position: absolute; right: 54px; top: 50%; transform: translateY(-50%); opacity: .95; z-index: 1; }
+  .cover-foot { position: absolute; left: 72px; bottom: 56px; display: flex; gap: 40px; font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: .12em; }
+  .badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line2); padding: 6px 12px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; color: var(--muted); }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 26px 34px; margin-top: 38px; max-width: 720px; }
+  .stat b { display: block; font-family: var(--mono); font-size: 46px; letter-spacing: -.03em; color: var(--text); }
+  .stat span { font-size: 12px; color: var(--dim); letter-spacing: .08em; text-transform: uppercase; }
+
+  .cards { display: grid; gap: 16px; margin-top: 34px; }
+  .c2 { grid-template-columns: 1fr 1fr; }
+  .c3 { grid-template-columns: repeat(3, 1fr); }
+  .c4 { grid-template-columns: repeat(4, 1fr); }
+  .card { border: 1px solid var(--line); background: rgba(15,24,21,.75); padding: 22px 24px; }
+  .card .t { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; color: var(--green); margin-bottom: 10px; }
+  .card h3 { margin-bottom: 7px; }
+  .card p { font-size: 14px; line-height: 1.55; }
+
+  .shot { border: 1px solid var(--line2); overflow: hidden; background: #000; }
+  .shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+
+  .flow { display: flex; align-items: stretch; gap: 0; margin-top: 34px; }
+  .step { flex: 1; border: 1px solid var(--line); background: rgba(15,24,21,.7); padding: 20px; position: relative; }
+  .step + .step { border-left: none; }
+  .step .n { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: .2em; }
+  .step h3 { margin: 10px 0 6px; font-size: 17px; }
+  .step p { font-size: 13px; }
+  .step.on { background: rgba(87,224,140,.06); border-color: var(--line2); }
+  .step.on .n { color: var(--green); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 28px; }
+  th { text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .18em; color: var(--dim); font-weight: 500; padding: 12px 14px; border-bottom: 1px solid var(--line2); text-transform: uppercase; }
+  td { padding: 15px 14px; border-bottom: 1px solid var(--line); font-size: 16px; }
+  td.k { color: var(--muted); }
+  td b { color: var(--green); font-weight: 600; }
+  td.lama { color: var(--red); font-family: var(--mono); font-size: 15px; }
+
+  .quote { font-size: 46px; line-height: 1.15; letter-spacing: -.025em; font-weight: 600; max-width: 960px; }
+  .quote small { display: block; font-size: 18px; font-weight: 400; color: var(--muted); margin-top: 26px; letter-spacing: 0; line-height: 1.5; max-width: 720px; }
+
+  .foot { position: absolute; left: 72px; bottom: 44px; right: 72px; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: .14em; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  .arch { display: flex; gap: 12px; margin-top: 30px; }
+  .arch .col { flex: 1; border: 1px solid var(--line); background: rgba(15,24,21,.6); padding: 16px; }
+  .arch .col .h { font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; color: var(--dim); margin-bottom: 12px; }
+  .arch .col b { display: block; font-size: 14px; margin-bottom: 4px; }
+  .arch .col span { display: block; font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .arch .col.acc { border-color: var(--line2); background: rgba(87,224,140,.06); }
+
+  @page { size: 13.333in 7.5in; margin: 0; }
+  @media print { body { background: #fff; } .slide { margin: 0; } }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide cover">
+  <div class="kicker">Kartika Cyber Hackathon 2026 · PUSSIBERAD × CODEPOLITAN</div>
+  <h1>LATMA<br>SIBER</h1>
+  <svg class="cover-art" width="380" height="380" viewBox="0 0 360 360">
+    <polygon points="180,50 292.6,115 292.6,245 180,310 67.4,245 67.4,115" fill="none" stroke="#1c2b24"/>
+    <polygon points="180,82.5 264.5,131.3 264.5,228.7 180,277.5 95.5,228.7 95.5,131.3" fill="none" stroke="#1c2b24"/>
+    <polygon points="180,115 236.3,147.5 236.3,212.5 180,245 123.7,212.5 123.7,147.5" fill="none" stroke="#1c2b24"/>
+    <line x1="180" y1="180" x2="180" y2="50" stroke="#1c2b24"/>
+    <line x1="180" y1="180" x2="292.6" y2="115" stroke="#1c2b24"/>
+    <line x1="180" y1="180" x2="292.6" y2="245" stroke="#1c2b24"/>
+    <line x1="180" y1="180" x2="180" y2="310" stroke="#1c2b24"/>
+    <line x1="180" y1="180" x2="67.4" y2="245" stroke="#1c2b24"/>
+    <line x1="180" y1="180" x2="67.4" y2="115" stroke="#1c2b24"/>
+    <polygon points="180,74.7 282.5,120.8 262.2,227.5 180,255.4 83.2,235.9 80.9,122.8" fill="rgba(87,224,140,.14)" stroke="#57e08c" stroke-width="1.6"/>
+    <circle cx="180" cy="74.7" r="3" fill="#57e08c"/>
+    <circle cx="282.5" cy="120.8" r="3" fill="#57e08c"/>
+    <circle cx="262.2" cy="227.5" r="3" fill="#57e08c"/>
+    <circle cx="180" cy="255.4" r="3" fill="#57e08c"/>
+    <circle cx="83.2" cy="235.9" r="3" fill="#57e08c"/>
+    <circle cx="80.9" cy="122.8" r="3" fill="#57e08c"/>
+    <text x="180" y="34" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" fill="#5f776c" letter-spacing="2">DETEKSI</text>
+    <text x="180" y="330" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" fill="#5f776c" letter-spacing="2">FORENSIK</text>
+    <text x="322" y="180" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" fill="#5f776c" letter-spacing="1">PENAHANAN</text>
+    <text x="38" y="180" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" fill="#5f776c" letter-spacing="1">KOMANDO</text>
+  </svg>
+  <div class="sub">Mesin latihan yang mengubah personel biasa menjadi operator siber yang <em>terukur</em>. Berjalan di satu laptop satuan, tanpa internet.</div>
+  <div class="stats">
+    <div class="stat"><b>4 detik</b><span>Membangkitkan satu paket latihan</span></div>
+    <div class="stat"><b>6</b><span>Kompetensi dinilai</span></div>
+    <div class="stat"><b>Rp 0</b><span>Biaya perangkat tambahan</span></div>
+  </div>
+  <div class="cover-foot">
+    <span>KATEGORI: DUKUNGAN TEKNOLOGI / IT-OT</span>
+    <span>PURWARUPA: BERJALAN</span>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="num">01 / MASALAH</div>
+  <div class="kicker">Konteks</div>
+  <h2 style="margin-top:18px">Ancaman sudah terukur.<br>Kesiapan kita belum.</h2>
+  <div class="stats">
+    <div class="stat"><b>5,2 M</b><span>Anomali trafik (BSSN, 2025)</span></div>
+    <div class="stat"><b>93,78%</b><span>Terkait malware</span></div>
+    <div class="stat"><b>&lt;10%</b><span>Trafik nasional terpantau</span></div>
+  </div>
+  <div class="cards c3">
+    <div class="card"><div class="t">MASALAH 01</div><h3>Latihan terlalu mahal</h3><p>Satu skenario layak butuh 3 hari kerja dan keahlian khusus. Akibatnya latihan jarang dilakukan.</p></div>
+    <div class="card"><div class="t">MASALAH 02</div><h3>Kesiapan tidak terukur</h3><p>Tanpa penilaian terstruktur, pimpinan tidak punya angka untuk menentukan siapa dilatih apa.</p></div>
+    <div class="card"><div class="t">MASALAH 03</div><h3>Solusi butuh internet</h3><p>Hampir semua platform latihan berbasis cloud. Di satuan, koneksi terbatas dan data tidak boleh keluar.</p></div>
+  </div>
+  <div class="foot"><span>LATMA SIBER</span><span>KARTIKA CYBER HACKATHON 2026</span></div>
+</section>
+
+<!-- 3 -->
+<section class="slide" style="justify-content:center">
+  <div class="num">02 / INSIGHT</div>
+  <div class="kicker">Pergeseran cara pandang</div>
+  <div class="quote" style="margin-top:26px">Semua orang membangun alat perang.<br><em>Hampir tidak ada yang membangun pabrik prajurit.</em>
+    <small>PUSSIBERAD sedang membangun kekuatan siber dari nol: jalur Bintara Siber, satuan baru, personel baru. Kebutuhan pertamanya bukan firewall tambahan — tapi cara mencetak dan mengukur operator, berulang, di seluruh satuan.</small>
+  </div>
+  <div class="foot"><span>LATMA SIBER</span><span>KARTIKA CYBER HACKATHON 2026</span></div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="num">03 / SOLUSI</div>
+  <div class="kicker">Empat modul, satu alur</div>
+  <h2 style="margin-top:16px;max-width:900px">Dari profil satuan menjadi indeks kesiapan, dalam satu sesi.</h2>
+  <div class="cards c4">
+    <div class="card"><div class="t">01 · PEMBANGKIT</div><h3>Scenario Forge</h3><p>Topologi aset, rantai serangan, pemetaan ATT&CK, inject keputusan, rubrik, panduan fasilitator — Bahasa Indonesia.</p></div>
+    <div class="card"><div class="t">02 · PELAKSANA</div><h3>Tabletop &amp; Lab</h3><p>Tabletop tanpa jaringan sama sekali. Lab terisolasi untuk latihan hands-on. Dua-duanya tanpa cloud.</p></div>
+    <div class="card"><div class="t">03 · PENILAI</div><h3>Papan Skor Hidup</h3><p>Enam kompetensi dinilai per keputusan. Peserta melihat dampak pilihannya langsung.</p></div>
+    <div class="card"><div class="t">04 · KOMANDO</div><h3>Readiness Index</h3><p>Radar per personel, heatmap per satuan, rekomendasi latihan berikutnya. Angka untuk mengambil keputusan.</p></div>
+  </div>
+  <div class="flow">
+    <div class="step on"><div class="n">LANGKAH 1</div><h3>Pilih</h3><p>8 profil satuan × 7 aktor ancaman × 3 tingkat</p></div>
+    <div class="step"><div class="n">LANGKAH 2</div><h3>Bangkitkan</h3><p>Paket lengkap dalam ± 4 detik</p></div>
+    <div class="step"><div class="n">LANGKAH 3</div><h3>Jalankan</h3><p>7–9 inject keputusan, 90–240 menit</p></div>
+    <div class="step"><div class="n">LANGKAH 4</div><h3>Tinjau</h3><p>Indeks, radar, linimasa, rekomendasi</p></div>
+  </div>
+  <div class="foot"><span>LATMA SIBER</span><span>KARTIKA CYBER HACKATHON 2026</span></div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="num">04 / PURWARUPA</div>
+  <div class="kicker">Mesin pembangkit</div>
+  <h2 style="margin-top:14px">Tiga pilihan. Empat detik. Satu paket latihan lengkap.</h2>
+  <div class="shot" style="margin-top:22px;height:430px;overflow:hidden"><img src="img/forge.png" alt="Halaman pembangkit paket latihan"></div>
+  <div class="foot"><span>LATMA SIBER</span><span>KARTIKA CYBER HACKATHON 2026</span></div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="num">05 / PURWARUPA</div>
+  <div class="kicker">Hasil yang bisa dipertanggungjawabkan</div>
+  <h2 style="margin-top:14px">Bukan nilai kosong. Profil kompetensi yang bisa dibaca.</h2>
+  <div style="display:flex;gap:22px;margin-top:20px">
+    <div class="shot" style="flex:1.35;height:474px;overflow:hidden"><img src="img/aar.png" alt="After action review"></div>
+    <div style="flex:.65;display:flex;flex-direction:column;gap:12px">
+      <div class="card"><div class="t">CONTOH SESI</div><h3 style="font-size:16px">Penahanan 91 · Komando 88</h3><p>Kuat di isolasi dan pengambilan keputusan.</p></div>
+      <div class="card" style="border-color:#5a3029"><div class="t" style="color:var(--red)">TITIK LEMAH</div><h3 style="font-size:16px">Forensik 58 · Pemulihan 73</h3><p>Barang bukti tidak diamankan; pemulihan bergantung cadangan yang sudah tercemar.</p></div>
+      <div class="card" style="border-color:#5a4822"><div class="t" style="color:var(--amber)">TINDAK LANJUT</div><h3 style="font-size:16px">Latihan terarah, 30 hari</h3><p>Modul forensik dasar dan uji pemulihan dari cadangan offline.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>LATMA SIBER</span><span>KARTIKA CYBER HACKATHON 2026</span></div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="num">06 / ARSITEKTUR</div>
+  <div class="kicker">Satu perangkat, tiga lapis</div>
+  <h2 style="margin-top:14px">Dibangun untuk satuan, bukan untuk pusat data.</h2>
+  <div class="arch">
+    <div class="col"><div class="h">INPUT</div><b>Profil satuan</b><span>Aset, personel, paparan, kelemahan</span><b style="margin-top:12px">Aktor ancaman</b><span>Ransomware, APT, insider, rantai pasok, operasi informasi, media lepas, DDoS</span></div>
+    <div class="col acc"><div class="h">MESIN PEMBANGKIT</div><b>Pipeline deterministik</b><span>Topologi · rantai serangan · inject · rubrik · panduan fasilitator</span><b style="margin-top:12px">Dapat diaudit</b><span>Keluaran sama untuk input sama — bukan kotak hitam</span></div>
+    <div class="col"><div class="h">PELAKSANA</div><b>Mode tabletop</b><span>Tanpa jaringan, tanpa perangkat tambahan</span><b style="margin-top:12px">Mode lab</b><span>Docker terisolasi, satu host</span></div>
+    <div class="col"><div class="h">PENILAIAN</div><b>Rubrik 6 kompetensi</b><span>Deteksi · Penahanan · Pemulihan · Forensik · Pelaporan · Komando</span><b style="margin-top:12px">Keluaran</b><span>Indeks kesiapan, radar, AAR, rekomendasi</span></div>
+  </div>
+  <div class="cards c3" style="margin-top:22px">
+    <div class="card"><div class="t">KEDAULATAN DATA</div><p>Tanpa panggilan API ke layanan luar. Data sesi tersimpan lokal di perangkat satuan.</p></div>
+    <div class="card"><div class="t">TANPA DEPENDENSI</div><p>Server memakai modul bawaan Node. Tidak ada paket eksternal, tidak ada build step.</p></div>
+    <div class="card"><div class="t">DAPAT DIBAWA</div><p>Versi statis berjalan penuh di peramban — bisa dibuka dari folder, tanpa server.</p></div>
+  </div>
+  <div class="foot"><span>LATMA SIBER</span><span>KARTIKA CYBER HACKATHON 2026</span></div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="num">07 / DAMPAK</div>
+  <div class="kicker">Sebelum dan sesudah</div>
+  <h2 style="margin-top:14px">Yang berubah, dalam angka.</h2>
+  <table>
+    <tr><th>Aspek</th><th>Sebelum</th><th>Sesudah</th></tr>
+    <tr><td class="k">Menyusun satu skenario</td><td class="lama">3 hari kerja</td><td><b>4 detik</b></td></tr>
+    <tr><td class="k">Biaya pelaksanaan</td><td class="lama">Rp 45 juta (vendor/venue)</td><td><b>Rp 0</b></td></tr>
+    <tr><td class="k">Kebutuhan jaringan</td><td class="lama">Internet + cloud</td><td><b>Nol</b></td></tr>
+    <tr><td class="k">Penilaian peserta</td><td class="lama">Kesan fasilitator</td><td><b>Indeks 0–100, 6 kompetensi</b></td></tr>
+    <tr><td class="k">Gambaran kesiapan satuan</td><td class="lama">Tidak ada</td><td><b>Heatmap seluruh satuan</b></td></tr>
+    <tr><td class="k">Waktu persiapan fasilitator</td><td class="lama">1–2 minggu</td><td><b>45 menit</b></td></tr>
+  </table>
+  <div style="margin-top:26px;border:1px solid var(--line2);background:rgba(87,224,140,.05);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;gap:20px">
+    <div>
+      <div class="t" style="font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--green);margin-bottom:6px">TOTAL PER LATIHAN</div>
+      <h3 style="font-size:22px">Satu laptop. Nol rupiah. Nol kabel.</h3>
+    </div>
+    <div class="mono" style="font-size:12px;color:var(--green);letter-spacing:.08em;text-align:right">45 MENIT PERSIAPAN<br>90–240 MENIT PELAKSANAAN</div>
+  </div>
+  <div class="foot"><span>LATMA SIBER</span><span>KARTIKA CYBER HACKATHON 2026</span></div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="num">08 / KELAYAKAN</div>
+  <div class="kicker">Adopsi bertahap, tanpa lompatan anggaran</div>
+  <h2 style="margin-top:14px">Bisa dipakai minggu depan. Bisa tumbuh jadi standar.</h2>
+  <div class="cards c3" style="margin-top:30px">
+    <div class="card"><div class="t">FASE 1 · 0–3 BULAN</div><h3>Lima satuan percontohan</h3><p>Tabletop penuh, tanpa biaya perangkat. Hasil: baseline kesiapan dan daftar celah kompetensi per satuan.</p></div>
+    <div class="card"><div class="t">FASE 2 · 3–9 BULAN</div><h3>Papan kesiapan pusat</h3><p>Agregasi lintas satuan, perpustakaan skenario bersama, pelatihan fasilitator internal.</p></div>
+    <div class="card"><div class="t">FASE 3 · 9–18 BULAN</div><h3>Lab &amp; sertifikasi</h3><p>Mode lab terisolasi, sertifikasi kompetensi personel, integrasi dengan program Bintara Siber.</p></div>
+  </div>
+  <div class="cards c2" style="margin-top:22px">
+    <div class="card"><div class="t">YANG SUDAH BERJALAN</div><p>Pembangkit paket, pelaksana tabletop, penilaian, AAR, papan komando, ekspor &amp; cetak paket, mode statis offline.</p></div>
+    <div class="card"><div class="t">YANG DISIAPKAN BERIKUTNYA</div><p>Runner lab Docker, tanda tangan kriptografis paket, sinkronisasi manual antar-satuan, modul OT mendalam.</p></div>
+  </div>
+  <div class="foot"><span>LATMA SIBER</span><span>KARTIKA CYBER HACKATHON 2026</span></div>
+</section>
+
+<!-- 10 -->
+<section class="slide cover">
+  <div class="num">09 / PENUTUP</div>
+  <div class="kicker">Satu kalimat</div>
+  <div class="quote" style="margin-top:20px">Pertahanan siber tidak kekurangan alat.<br><em>Ia kekurangan prajurit terlatih.</em>
+    <small>LATMA SIBER mencetak dan mengukur prajurit itu — di satu laptop, tanpa internet, mulai minggu depan.</small>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>8</b><span>Profil satuan</span></div>
+    <div class="stat"><b>7</b><span>Aktor ancaman</span></div>
+    <div class="stat"><b>7</b><span>Teknik ATT&amp;CK per skenario</span></div>
+    <div class="stat"><b>0</b><span>Ketergantungan cloud</span></div>
+  </div>
+  <div class="cover-foot"><span>LATMA SIBER · KARTIKA CYBER HACKATHON 2026</span><span>PURWARUPA DAPAT DIAKSES</span></div>
+</section>
+
+</body>
+</html>
