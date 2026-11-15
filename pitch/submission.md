@@ -3,39 +3,42 @@
 ## 1. Judul Karya
 
 ```
-LATMA SIBER — Platform Latihan dan Pengukuran Kesiapan Siber Satuan
+LATMA SIBER — Peta Risiko, Detection Pack, dan Pengukuran Kesiapan Siber Satuan
 ```
 
 ## 2. Deskripsi Ide (versi pendek, ±120 kata — untuk form pendaftaran)
 
 ```
-Pertahanan siber TNI AD tidak hanya membutuhkan teknologi, tetapi personel yang terlatih dan terukur. LATMA SIBER adalah platform latihan siber yang membangkitkan paket latihan secara otomatis: dari profil satuan, aktor ancaman, dan tingkat kesulitan, sistem menyusun topologi aset, skenario serangan dengan pemetaan MITRE ATT&CK, inject keputusan, rubrik enam kompetensi, serta buku panduan fasilitator dan peserta dalam Bahasa Indonesia.
+LATMA SIBER mengubah inventaris aset satuan menjadi tiga keluaran operasional sekaligus.
 
-Latihan dapat dijalankan dalam dua mode: tabletop tanpa infrastruktur — cocok untuk satuan dengan keterbatasan IT — dan lab terisolasi untuk latihan hands-on. Sistem menilai keputusan peserta secara langsung dan menghasilkan After Action Review berupa radar kompetensi per personel serta Indeks Kesiapan per satuan, sehingga PUSSIBERAD dapat memetakan kesiapan siber seluruh satuan secara berkelanjutan. Seluruh sistem berjalan on-premise dan dapat dioperasikan tanpa koneksi internet.
+Pertama, peta risiko: dari daftar aset dan kelemahannya, sistem menghitung indeks paparan 0–100, jalur serangan paling mungkin menuju aset kritis, titik kritis yang memutus banyak jalur, serta kontrol prioritas per aset — tanpa pemindaian aktif, sehingga aman dijalankan pada jaringan operasional.
 
-Kategori: Dukungan Teknologi (Core Infra).
+Kedua, Detection Pack: setiap skenario dibangkitkan menjadi aturan deteksi Sigma siap pasang di SIEM satuan (Wazuh, Elastic, Splunk, Sentinel) beserta daftar indikator ancaman.
+
+Ketiga, indeks kesiapan personel: enam kompetensi dinilai melalui latihan tabletop atau lab, lalu dirangkum menjadi risiko bersih satuan — paparan teknis dikali kesiapan manusia.
+
+Seluruh sistem berjalan on-premise, tanpa internet, pada satu laptop satuan. Kategori: Dukungan Teknologi (Core Infra).
 ```
 
 ## 3. Deskripsi Ide (versi panjang — untuk slide/deskripsi project)
 
 ```
 MASALAH
-Latihan siber di tingkat satuan masih mahal dan jarang dilakukan. Menyusun satu skenario yang layak membutuhkan berhari-hari kerja dan keahlian khusus, sementara hasilnya dinilai berdasarkan kesan fasilitator, bukan angka. Akibatnya pimpinan tidak memiliki gambaran kesiapan personel, dan kemampuan baru teruji ketika insiden nyata terjadi. Solusi yang ada umumnya berbasis cloud, sehingga sulit diterapkan pada satuan dengan koneksi terbatas dan data yang tidak boleh keluar.
+Satuan memiliki daftar aset dan daftar kelemahan, tetapi tidak memiliki cara mengubahnya menjadi keputusan: jalur mana yang paling mungkin ditembus, kontrol mana yang harus ditutup lebih dulu, dan apakah personelnya mampu merespons. Solusi yang ada menuntut pemindaian aktif yang berisiko pada jaringan operasional, berjalan di cloud yang tidak boleh dipakai, atau berhenti pada dashboard tanpa keluaran yang bisa dieksekusi.
 
-SOLUSI
-LATMA SIBER membalik pendekatan: bukan membangun alat deteksi baru, tetapi mesin yang mencetak dan mengukur operator. Tiga lapis:
+SOLUSI — TIGA KELUARAN DARI SATU INVENTARIS
 
-1. Mesin Pembangkit — dari tiga input (profil satuan, aktor ancaman, tingkat kesulitan) sistem menghasilkan paket latihan lengkap: topologi aset dan zona, rantai serangan empat fase dengan pemetaan MITRE ATT&CK, 5–9 inject keputusan beserta opsi dan kunci, rubrik enam kompetensi, panduan fasilitator, daftar indikator ancaman, dan prasyarat pelaksanaan. Seluruhnya dalam Bahasa Indonesia dan dapat diekspor serta dicetak.
+1. Peta Risiko. Model heuristik yang menghitung indeks paparan 0–100, memeringkat jalur serangan dari titik masuk publik sampai aset kritis, mengidentifikasi choke point yang memutus banyak jalur sekaligus, dan menerjemahkannya menjadi kontrol prioritas per aset. Tidak melakukan pemindaian aktif, sehingga aman dijalankan di jaringan yang sedang beroperasi.
 
-2. Mesin Pelaksana — dua mode. Mode tabletop berjalan tanpa jaringan sama sekali, cocok untuk satuan dengan keterbatasan infrastruktur. Mode lab menyediakan lingkungan terisolasi untuk latihan hands-on.
+2. Detection Pack. Dari teknik MITRE ATT&CK pada skenario, sistem membangkitkan aturan deteksi berformat Sigma lengkap dengan logsource, kondisi, false positive, dan level — siap dipasang pada SIEM satuan. Latihan tidak berhenti pada nilai; ia meninggalkan pertahanan yang bisa langsung dipakai.
 
-3. Mesin Penilaian — setiap keputusan dinilai pada enam kompetensi: deteksi, penahanan, pemulihan, forensik, pelaporan, dan komando. Keluarannya berupa Indeks Kesiapan 0–100, radar kompetensi, linimasa keputusan beserta kunci jawaban, dan rekomendasi latihan berikutnya. Agregasi lintas satuan ditampilkan sebagai peta kesiapan.
+3. Indeks Kesiapan Personel. Latihan tabletop (tanpa jaringan) atau lab terisolasi menilai enam kompetensi: deteksi, penahanan, pemulihan, forensik, pelaporan, dan komando. Hasilnya digabungkan dengan paparan teknis menjadi risiko bersih satuan, sehingga pimpinan melihat satu angka yang bergerak ketika personel dilatih atau aset diperbaiki.
 
 DAMPAK
-Waktu menyusun skenario: 3 hari kerja menjadi 4 detik. Biaya pelaksanaan: dari puluhan juta rupiah menjadi nol. Persiapan fasilitator: 1–2 minggu menjadi 45 menit. Penilaian: dari kesan menjadi indeks yang dapat dibandingkan antar-waktu dan antar-satuan.
+Menyusun satu skenario: 3 hari kerja menjadi 4 detik. Biaya pelaksanaan: puluhan juta rupiah menjadi nol. Persiapan fasilitator: 1–2 minggu menjadi 45 menit. Penilaian: dari kesan menjadi indeks yang dapat dibandingkan antar-waktu dan antar-satuan. Setiap latihan menghasilkan artefak pertahanan (aturan deteksi) yang dapat langsung diterapkan.
 
 KELAYAKAN
-Berjalan di satu laptop atau mini-PC satuan, tanpa dependensi eksternal dan tanpa internet. Tersedia versi statis yang berjalan penuh di peramban. Roadmap adopsi tiga fase: pilot lima satuan (0–3 bulan), papan kesiapan pusat (3–9 bulan), lab terisolasi dan sertifikasi kompetensi personel (9–18 bulan).
+Berjalan di satu laptop atau mini-PC satuan, tanpa dependensi eksternal, tanpa internet, tanpa pemindaian aktif. Tersedia versi statis yang berjalan penuh di peramban. Roadmap: pilot lima satuan (0–3 bulan), papan kesiapan pusat dan perpustakaan skenario (3–9 bulan), lab terisolasi dan sertifikasi kompetensi (9–18 bulan).
 ```
 
 ## 4. Kategori
@@ -47,22 +50,22 @@ Dukungan Teknologi (Core Infra)
 ## 5. Teknologi
 
 ```
-Node.js (tanpa dependensi eksternal) · Vanilla JavaScript · SVG · Docker (mode lab, rancangan)
+Node.js (tanpa dependensi eksternal) · Vanilla JavaScript · SVG · Sigma (format aturan deteksi) · Docker (mode lab, rancangan)
 ```
 
 ## 6. Tautan yang Disubmit
 
 | Item | Isi |
 |---|---|
-| Link karya | `https://<akun>.github.io/latma-siber/` (versi statis, langsung dapat dijalankan di peramban) |
-| Repositori | `https://github.com/<akun>/latma-siber` |
+| Link karya | `https://kisworo.github.io/latma-siber/` |
+| Repositori | `https://github.com/kisworo/latma-siber` |
 | Video presentasi | `<link YouTube unlisted>` |
-| Slide penjelasan | `LATMA-SIBER-Deck.pdf` (10 halaman) |
+| Slide penjelasan | `LATMA-SIBER-Deck.pdf` (12 halaman) |
 
 ## 7. Checklist Submission
 
 - [ ] Link karya dapat dibuka tanpa login, di peramban apa pun.
-- [ ] Link karya diuji di jendela penyamaran (incognito) — bukan hanya di peramban sendiri.
+- [ ] Link karya diuji di jendela penyamaran (incognito).
 - [ ] Video presentasi: akses "siapa saja yang memiliki link", durasi ≤ 3 menit.
 - [ ] Slide PDF terunggah dan dapat diunduh.
 - [ ] Deskripsi ide sudah ditempel di halaman submission CODEPOLITAN.

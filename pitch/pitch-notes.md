@@ -31,7 +31,12 @@ Aturan: satu ide per slide, jangan membaca slide. Angka selalu disebut.
 > **Komando**: indeks kesiapan per personel dan heatmap per satuan.
 > Hasilnya: dari profil satuan menjadi indeks kesiapan, dalam satu sesi."
 
-### 3:30–6:30 · Demo langsung (slide 5–6)
+### 3:30–4:30 · Peta risiko & Detection Pack (slide 6–7)
+> "Sebelum latihan dijalankan, paket ini sudah menghasilkan dua hal yang dipakai di luar latihan.
+> Pertama peta risiko: dari inventaris aset, sistem memeringkat jalur serangan — di contoh ini empat jalur, semuanya lewat satu titik yang sama. Titik itu yang harus ditutup lebih dulu.
+> Kedua Detection Pack: delapan aturan Sigma siap pasang di SIEM satuan. Jadi setiap latihan meninggalkan pertahanan, bukan cuma nilai."
+
+### 4:30–7:30 · Demo langsung (slide 8–9)
 *(Buka aplikasi. Jangan pakai slide. Bicara sambil klik.)*
 > "Saya pilih Pos Logistik, aktor ransomware, tingkat menengah. Klik bangkitkan.
 > — empat detik — dan ini paketnya: topologi enam node termasuk satu perangkat OT, rantai serangan empat fase dengan sembilan teknik ATT&CK, tujuh inject, rubrik enam kompetensi, panduan fasilitator, dan indikator ancaman.
@@ -42,17 +47,17 @@ Aturan: satu ide per slide, jangan membaca slide. Angka selalu disebut.
 > Sistem langsung memberi rekomendasi: standarkan pengambilan barang bukti, uji pemulihan dari cadangan offline.
 > Ini yang tidak bisa dilakukan penilaian manual: satu sesi, enam kompetensi, angka yang bisa dibandingkan antar-waktu dan antar-satuan."
 
-### 6:30–7:40 · Arsitektur & kedaulatan (slide 7)
+### 7:30–8:20 · Arsitektur & kedaulatan (slide 10)
 > "Arsitekturnya sengaja sederhana. Satu perangkat, tiga lapis: pembangkit, pelaksana, penilai.
 > Tidak ada panggilan API ke layanan luar. Server memakai modul bawaan Node — tanpa dependensi, tanpa build step. Ada versi statis yang berjalan penuh di peramban, bisa dibuka dari folder.
 > Artinya: tidak ada data satuan yang keluar, tidak ada biaya langganan, dan tidak ada ketergantungan pada koneksi."
 
-### 7:40–8:40 · Dampak & kelayakan (slide 8–9)
+### 8:20–9:00 · Dampak & kelayakan (slide 11–12)
 > "Angkanya: menyusun skenario dari tiga hari menjadi empat detik. Biaya pelaksanaan dari puluhan juta menjadi nol. Persiapan fasilitator dari satu-dua minggu menjadi 45 menit.
 > Adopsinya bertahap. Fase satu: lima satuan percontohan, tabletop penuh, tanpa biaya perangkat. Fase dua: papan kesiapan pusat dan perpustakaan skenario bersama. Fase tiga: lab terisolasi dan sertifikasi kompetensi personel — terhubung dengan program Bintara Siber.
 > Yang sudah berjalan hari ini: pembangkit paket, tabletop, penilaian, AAR, papan komando, ekspor dan cetak paket, mode offline."
 
-### 8:40–9:20 · Penutup (slide 10)
+### 9:00–9:40 · Penutup (slide 13)
 > "Satu kalimat.
 > Pertahanan siber tidak kekurangan alat. Ia kekurangan prajurit terlatih.
 > LATMA SIBER mencetak dan mengukur prajurit itu — di satu laptop, tanpa internet, mulai minggu depan.

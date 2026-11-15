@@ -9,7 +9,7 @@ await rm(DIST, { recursive: true, force: true });
 await mkdir(join(DIST, 'vendor'), { recursive: true });
 
 await cp(join(ROOT, 'public'), DIST, { recursive: true });
-for (const f of ['data.mjs', 'generator.mjs', 'dashboard.mjs']) {
+for (const f of ['data.mjs', 'generator.mjs', 'dashboard.mjs', 'sigma.mjs']) {
   await cp(join(ROOT, 'src', f), join(DIST, 'vendor', f));
 }
 

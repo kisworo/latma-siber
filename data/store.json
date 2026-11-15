@@ -1,8 +1,8 @@
 {
  "paket": [
   {
-   "id": "PKT-MWHW1CNV4",
-   "dibuat": "2026-11-15T13:46:20.635Z",
+   "id": "PKT-MWHXFU351",
+   "dibuat": "2026-11-15T14:25:36.018Z",
    "meta": {
     "nama": "RANSOM-93 vs Pos Logistik",
     "satuan": {
@@ -1276,6 +1276,330 @@
      ]
     }
    ],
+   "risiko": {
+    "paparan": 73,
+    "jalur": [
+     {
+      "simpul": [
+       "INTERNET",
+       "RT-EDGE-01",
+       "TIMBANGAN-DIGITAL-01"
+      ],
+      "tipe": [
+       "zona",
+       "jaringan",
+       "ot"
+      ],
+      "skor": 73,
+      "dampak": "Penguasaan perangkat operasional — dampak fisik",
+      "target": "TIMBANGAN-DIGITAL-01"
+     },
+     {
+      "simpul": [
+       "INTERNET",
+       "RT-EDGE-01",
+       "SRV-INVENTORI"
+      ],
+      "tipe": [
+       "zona",
+       "jaringan",
+       "server"
+      ],
+      "skor": 60,
+      "dampak": "Penguasaan server dan data operasional",
+      "target": "SRV-INVENTORI"
+     },
+     {
+      "simpul": [
+       "INTERNET",
+       "RT-EDGE-01",
+       "PC-ADM-01"
+      ],
+      "tipe": [
+       "zona",
+       "jaringan",
+       "host"
+      ],
+      "skor": 53,
+      "dampak": "Penguasaan workstation staf",
+      "target": "PC-ADM-01"
+     },
+     {
+      "simpul": [
+       "INTERNET",
+       "RT-EDGE-01",
+       "PC-POSLOG-02"
+      ],
+      "tipe": [
+       "zona",
+       "jaringan",
+       "host"
+      ],
+      "skor": 53,
+      "dampak": "Penguasaan workstation staf",
+      "target": "PC-POSLOG-02"
+     }
+    ],
+    "chokePoints": [
+     {
+      "label": "RT-EDGE-01",
+      "tipe": "jaringan",
+      "risiko": "Kredensial bawaan, aturan longgar"
+     },
+     {
+      "label": "TIMBANGAN-DIGITAL-01",
+      "tipe": "ot",
+      "risiko": "Kata sandi bawaan, tanpa segmentasi"
+     }
+    ],
+    "kontrol": [
+     {
+      "aset": "RT-EDGE-01",
+      "teks": "Ganti kredensial bawaan seluruh perangkat tepi, aktifkan MFA untuk akun administrator, dan simpan di brankas kata sandi satuan."
+     },
+     {
+      "aset": "SRV-INVENTORI",
+      "teks": "Terapkan siklus tambalan bulanan dengan jendela pemeliharaan tetap; prioritaskan layanan yang terekspos ke jaringan pengguna."
+     },
+     {
+      "aset": "SRV-INVENTORI",
+      "teks": "Blokir SMB (445) antar-workstation, aktifkan penandatanganan SMB, dan batasi berbagi hanya ke server berkas."
+     },
+     {
+      "aset": "TIMBANGAN-DIGITAL-01",
+      "teks": "Ganti kata sandi pabrik pada perangkat OT, terapkan akses baca-saja untuk pemantauan, dan pisahkan VLAN OT dari IT."
+     },
+     {
+      "aset": "PC-ADM-01",
+      "teks": "Terapkan prinsip hak minimum: akun pengguna biasa untuk kerja harian, akun admin hanya untuk tugas administratif."
+     }
+    ],
+    "catatan": "Model heuristik berbasis inventaris aset dan kelemahan yang tercatat. Bukan hasil pemindaian aktif — aman dijalankan pada jaringan operasional."
+   },
+   "deteksi": {
+    "aturan": [
+     {
+      "teknik": "T1566.002",
+      "namaTeknik": "Spearphishing Link",
+      "judul": "Email dengan tautan ke domain mirip layanan internal",
+      "level": "medium",
+      "logsource": [
+       "product: windows",
+       "category: proxy"
+      ],
+      "deteksi": [
+       "selection:",
+       "  url|contains:",
+       "    - 'login-'",
+       "    - 'verifikasi-'",
+       "    - 'pembaruan-akun'",
+       "  cs-method: GET",
+       "condition: selection"
+      ],
+      "falsepositives": [
+       "Kampanye email resmi dengan tautan pendek",
+       "Portal mitra dengan penamaan serupa"
+      ],
+      "tags": [
+       "attack.initial_access",
+       "attack.t1566.002"
+      ],
+      "yaml": "title: Email dengan tautan ke domain mirip layanan internal\nid: latma-t1566-002\nstatus: experimental\ndescription: Terdeteksi pada skenario latihan LATMA SIBER (T1566.002 — Spearphishing Link).\nreferences:\n  - https://attack.mitre.org/techniques/T1566/002/\nauthor: LATMA SIBER\nlogsource:\n  product: windows\n  category: proxy\ndetection:\n  selection:\n    url|contains:\n      - 'login-'\n      - 'verifikasi-'\n      - 'pembaruan-akun'\n    cs-method: GET\n  condition: selection\nfalsepositives:\n  - Kampanye email resmi dengan tautan pendek\n  - Portal mitra dengan penamaan serupa\nlevel: medium\ntags:\n  - attack.initial_access\n  - attack.t1566.002"
+     },
+     {
+      "teknik": "T1078",
+      "namaTeknik": "Valid Accounts",
+      "judul": "Login akun sah di luar jam dinas dari lokasi baru",
+      "level": "medium",
+      "logsource": [
+       "product: windows",
+       "service: security"
+      ],
+      "deteksi": [
+       "selection:",
+       "  eventid: 4624",
+       "  logon_type: 10",
+       "  hour|lt: 6",
+       "condition: selection | count() by target_username > 3"
+      ],
+      "falsepositives": [
+       "Petugas jaga",
+       "Pemeliharaan terjadwal vendor"
+      ],
+      "tags": [
+       "attack.defense_evasion",
+       "attack.t1078"
+      ],
+      "yaml": "title: Login akun sah di luar jam dinas dari lokasi baru\nid: latma-t1078\nstatus: experimental\ndescription: Terdeteksi pada skenario latihan LATMA SIBER (T1078 — Valid Accounts).\nreferences:\n  - https://attack.mitre.org/techniques/T1078/\nauthor: LATMA SIBER\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    eventid: 4624\n    logon_type: 10\n    hour|lt: 6\n  condition: selection | count() by target_username > 3\nfalsepositives:\n  - Petugas jaga\n  - Pemeliharaan terjadwal vendor\nlevel: medium\ntags:\n  - attack.defense_evasion\n  - attack.t1078"
+     },
+     {
+      "teknik": "T1204.002",
+      "namaTeknik": "Malicious File",
+      "judul": "Eksekusi berkas dari folder unduhan oleh aplikasi perkantoran",
+      "level": "high",
+      "logsource": [
+       "product: windows",
+       "category: process_creation"
+      ],
+      "deteksi": [
+       "selection:",
+       "  parentimage|endswith:",
+       "    - '\\WINWORD.EXE'",
+       "    - '\\EXCEL.EXE'",
+       "  image|endswith:",
+       "    - '\\cmd.exe'",
+       "    - '\\powershell.exe'",
+       "    - '\\wscript.exe'",
+       "condition: selection"
+      ],
+      "falsepositives": [
+       "Makro resmi untuk integrasi sistem"
+      ],
+      "tags": [
+       "attack.execution",
+       "attack.t1204.002"
+      ],
+      "yaml": "title: Eksekusi berkas dari folder unduhan oleh aplikasi perkantoran\nid: latma-t1204-002\nstatus: experimental\ndescription: Terdeteksi pada skenario latihan LATMA SIBER (T1204.002 — Malicious File).\nreferences:\n  - https://attack.mitre.org/techniques/T1204/002/\nauthor: LATMA SIBER\nlogsource:\n  product: windows\n  category: process_creation\ndetection:\n  selection:\n    parentimage|endswith:\n      - '\\WINWORD.EXE'\n      - '\\EXCEL.EXE'\n    image|endswith:\n      - '\\cmd.exe'\n      - '\\powershell.exe'\n      - '\\wscript.exe'\n  condition: selection\nfalsepositives:\n  - Makro resmi untuk integrasi sistem\nlevel: high\ntags:\n  - attack.execution\n  - attack.t1204.002"
+     },
+     {
+      "teknik": "T1059.001",
+      "namaTeknik": "PowerShell",
+      "judul": "PowerShell dengan perintah terenkode",
+      "level": "high",
+      "logsource": [
+       "product: windows",
+       "category: process_creation"
+      ],
+      "deteksi": [
+       "selection:",
+       "  image|endswith: '\\powershell.exe'",
+       "  commandline|contains:",
+       "    - '-enc '",
+       "    - '-encodedcommand'",
+       "    - 'frombase64string'",
+       "    - '-windowstyle hidden'",
+       "condition: selection"
+      ],
+      "falsepositives": [
+       "Skrip administrasi terjadwal yang belum ditandatangani"
+      ],
+      "tags": [
+       "attack.execution",
+       "attack.t1059.001"
+      ],
+      "yaml": "title: PowerShell dengan perintah terenkode\nid: latma-t1059-001\nstatus: experimental\ndescription: Terdeteksi pada skenario latihan LATMA SIBER (T1059.001 — PowerShell).\nreferences:\n  - https://attack.mitre.org/techniques/T1059/001/\nauthor: LATMA SIBER\nlogsource:\n  product: windows\n  category: process_creation\ndetection:\n  selection:\n    image|endswith: '\\powershell.exe'\n    commandline|contains:\n      - '-enc '\n      - '-encodedcommand'\n      - 'frombase64string'\n      - '-windowstyle hidden'\n  condition: selection\nfalsepositives:\n  - Skrip administrasi terjadwal yang belum ditandatangani\nlevel: high\ntags:\n  - attack.execution\n  - attack.t1059.001"
+     },
+     {
+      "teknik": "T1046",
+      "namaTeknik": "Network Service Discovery",
+      "judul": "Pemindaian port internal dalam waktu singkat",
+      "level": "medium",
+      "logsource": [
+       "product: windows",
+       "service: security"
+      ],
+      "deteksi": [
+       "selection:",
+       "  eventid: 5156",
+       "  destinationport|lt: 1024",
+       "condition: selection | count(destination_port) by source_ip > 40"
+      ],
+      "falsepositives": [
+       "Alat pemantauan jaringan",
+       "Pemindaian kerentanan terjadwal"
+      ],
+      "tags": [
+       "attack.discovery",
+       "attack.t1046"
+      ],
+      "yaml": "title: Pemindaian port internal dalam waktu singkat\nid: latma-t1046\nstatus: experimental\ndescription: Terdeteksi pada skenario latihan LATMA SIBER (T1046 — Network Service Discovery).\nreferences:\n  - https://attack.mitre.org/techniques/T1046/\nauthor: LATMA SIBER\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    eventid: 5156\n    destinationport|lt: 1024\n  condition: selection | count(destination_port) by source_ip > 40\nfalsepositives:\n  - Alat pemantauan jaringan\n  - Pemindaian kerentanan terjadwal\nlevel: medium\ntags:\n  - attack.discovery\n  - attack.t1046"
+     },
+     {
+      "teknik": "T1021.002",
+      "namaTeknik": "SMB/Windows Admin Shares",
+      "judul": "Akses berbagi admin SMB antar-workstation",
+      "level": "high",
+      "logsource": [
+       "product: windows",
+       "service: security"
+      ],
+      "deteksi": [
+       "selection:",
+       "  eventid: 5140",
+       "  sharename|endswith:",
+       "    - '$'",
+       "  sourceip|not_in:",
+       "    - '10.10.0.0/16'",
+       "condition: selection"
+      ],
+      "falsepositives": [
+       "Pencadangan terjadwal",
+       "Alat manajemen terpusat"
+      ],
+      "tags": [
+       "attack.lateral_movement",
+       "attack.t1021.002"
+      ],
+      "yaml": "title: Akses berbagi admin SMB antar-workstation\nid: latma-t1021-002\nstatus: experimental\ndescription: Terdeteksi pada skenario latihan LATMA SIBER (T1021.002 — SMB/Windows Admin Shares).\nreferences:\n  - https://attack.mitre.org/techniques/T1021/002/\nauthor: LATMA SIBER\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    eventid: 5140\n    sharename|endswith:\n      - '$'\n    sourceip|not_in:\n      - '10.10.0.0/16'\n  condition: selection\nfalsepositives:\n  - Pencadangan terjadwal\n  - Alat manajemen terpusat\nlevel: high\ntags:\n  - attack.lateral_movement\n  - attack.t1021.002"
+     },
+     {
+      "teknik": "T1486",
+      "namaTeknik": "Data Encrypted for Impact",
+      "judul": "Enkripsi massal berkas pengguna",
+      "level": "critical",
+      "logsource": [
+       "product: windows",
+       "category: file_event"
+      ],
+      "deteksi": [
+       "selection:",
+       "  target_filename|endswith:",
+       "    - '.r93'",
+       "    - '.locked'",
+       "    - '.enc'",
+       "condition: selection | count() by host > 20"
+      ],
+      "falsepositives": [
+       "Aplikasi enkripsi arsip sah"
+      ],
+      "tags": [
+       "attack.impact",
+       "attack.t1486"
+      ],
+      "yaml": "title: Enkripsi massal berkas pengguna\nid: latma-t1486\nstatus: experimental\ndescription: Terdeteksi pada skenario latihan LATMA SIBER (T1486 — Data Encrypted for Impact).\nreferences:\n  - https://attack.mitre.org/techniques/T1486/\nauthor: LATMA SIBER\nlogsource:\n  product: windows\n  category: file_event\ndetection:\n  selection:\n    target_filename|endswith:\n      - '.r93'\n      - '.locked'\n      - '.enc'\n  condition: selection | count() by host > 20\nfalsepositives:\n  - Aplikasi enkripsi arsip sah\nlevel: critical\ntags:\n  - attack.impact\n  - attack.t1486"
+     },
+     {
+      "teknik": "T1490",
+      "namaTeknik": "Inhibit System Recovery",
+      "judul": "Penghapusan cadangan bayangan sistem",
+      "level": "critical",
+      "logsource": [
+       "product: windows",
+       "category: process_creation"
+      ],
+      "deteksi": [
+       "selection:",
+       "  image|endswith:",
+       "    - '\\vssadmin.exe'",
+       "    - '\\wbadmin.exe'",
+       "  commandline|contains:",
+       "    - 'delete'",
+       "    - 'shadows'",
+       "    - 'catalog'",
+       "condition: selection"
+      ],
+      "falsepositives": [
+       "Pemeliharaan ruang disk oleh administrator"
+      ],
+      "tags": [
+       "attack.impact",
+       "attack.t1490"
+      ],
+      "yaml": "title: Penghapusan cadangan bayangan sistem\nid: latma-t1490\nstatus: experimental\ndescription: Terdeteksi pada skenario latihan LATMA SIBER (T1490 — Inhibit System Recovery).\nreferences:\n  - https://attack.mitre.org/techniques/T1490/\nauthor: LATMA SIBER\nlogsource:\n  product: windows\n  category: process_creation\ndetection:\n  selection:\n    image|endswith:\n      - '\\vssadmin.exe'\n      - '\\wbadmin.exe'\n    commandline|contains:\n      - 'delete'\n      - 'shadows'\n      - 'catalog'\n  condition: selection\nfalsepositives:\n  - Pemeliharaan ruang disk oleh administrator\nlevel: critical\ntags:\n  - attack.impact\n  - attack.t1490"
+     }
+    ],
+    "cakupan": "8/8"
+   },
    "ioc": [
     {
      "tipe": "Domain",
@@ -1380,14 +1704,14 @@
  ],
  "sesi": [
   {
-   "id": "SES-MWHW1CNW",
-   "paketId": "PKT-MWHW1CNV4",
+   "id": "SES-MWHXFU39",
+   "paketId": "PKT-MWHXFU351",
    "paketSatuan": "poslog",
    "satuanNama": "Pos Logistik",
    "aktorNama": "RANSOM-93",
    "level": "Menengah",
    "tim": "Tim Siber Pos Logistik",
-   "mulai": "2026-11-15T13:46:20.636Z",
+   "mulai": "2026-11-15T14:25:36.021Z",
    "jawaban": {
     "INJ-01": [
      "O1",
@@ -1625,6 +1949,8 @@
       ]
      }
     ],
+    "risikoBersih": 35,
+    "paparan": 73,
     "kuat": [
      {
       "nama": "Penahanan",
@@ -1666,7 +1992,7 @@
    },
    "selesai": true,
    "indeks": 7,
-   "selesaiPada": "2026-11-15T13:46:20.645Z"
+   "selesaiPada": "2026-11-15T14:25:36.039Z"
   }
  ]
 }

@@ -1,4 +1,5 @@
 import { SATUAN, AKTOR, LEVEL, KOMPETENSI, INJECT_LANJUT } from './data.mjs';
+import { aturanUntuk } from './sigma.mjs';
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -150,6 +151,97 @@ export function daftarKombinasi() {
   };
 }
 
+
+// ---- Analisis jalur serangan (heuristik, bukan hasil pemindaian) ----
+const BOBOT_NODE = { zona: 0, jaringan: 4, server: 5, ot: 7, host: 4, periferal: 3 };
+
+const KONTROL = {
+  'Kredensial bawaan': 'Ganti kredensial bawaan seluruh perangkat tepi, aktifkan MFA untuk akun administrator, dan simpan di brankas kata sandi satuan.',
+  'Kata sandi bawaan': 'Ganti kata sandi pabrik pada perangkat OT, terapkan akses baca-saja untuk pemantauan, dan pisahkan VLAN OT dari IT.',
+  'Tambalan tertunda': 'Terapkan siklus tambalan bulanan dengan jendela pemeliharaan tetap; prioritaskan layanan yang terekspos ke jaringan pengguna.',
+  'SMB terbuka': 'Blokir SMB (445) antar-workstation, aktifkan penandatanganan SMB, dan batasi berbagi hanya ke server berkas.',
+  'Hak admin lokal': 'Terapkan prinsip hak minimum: akun pengguna biasa untuk kerja harian, akun admin hanya untuk tugas administratif.',
+  'USB bebas': 'Terapkan kebijakan media lepas: hanya media terdaftar, pemindaian wajib, dan penonaktifan port USB mass storage.',
+  'Tanpa segmentasi': 'Segmentasikan jaringan menjadi zona IT, OT, dan tamu; terapkan aturan antar-zona yang eksplisit.',
+  'Antivirus tidak terkelola': 'Pasang agen EDR terpusat dengan pembaruan definisi otomatis dan pemantauan dari satu konsol.',
+  'Kata sandi bawaan, jarang diperbarui': 'Inventarisasi perangkat pendukung, ganti kredensial bawaan, dan jadwalkan pembaruan firmware.',
+  'Antivirus tidak terkelola, berbagi folder': 'Batasi berbagi folder ke server berkas dan aktifkan pemantauan endpoint.'
+};
+
+function analisisJalur(t) {
+  const peta = Object.fromEntries(t.nodes.map((n) => [n.id, n]));
+  const tetangga = {};
+  t.links.forEach(([a, b]) => {
+    (tetangga[a] = tetangga[a] || []).push(b);
+    (tetangga[b] = tetangga[b] || []).push(a);
+  });
+  let target = t.nodes.filter((n) => ['server', 'ot', 'host'].includes(n.tipe)).map((n) => n.id);
+  if (!target.length) target = t.nodes.filter((n) => n.tipe === 'periferal').map((n) => n.id);
+  const jalur = [];
+  const telusuri = (simpul, lintasan) => {
+    if (lintasan.length > 4) return;
+    if (target.includes(simpul) && lintasan.length > 1) {
+      const skor = lintasan.reduce((a, id) => a + (BOBOT_NODE[peta[id].tipe] || 0), 0);
+      jalur.push({ simpul: [...lintasan], skor });
+      return;
+    }
+    for (const next of tetangga[simpul] || []) {
+      if (lintasan.includes(next)) continue;
+      telusuri(next, [...lintasan, next]);
+    }
+  };
+  telusuri('inet', ['inet']);
+
+  jalur.sort((a, b) => b.skor - a.skor);
+  const unik = [];
+  const kunci = new Set();
+  for (const j of jalur) {
+    const k = j.simpul.join('>');
+    if (kunci.has(k)) continue;
+    kunci.add(k);
+    unik.push(j);
+    if (unik.length >= 4) break;
+  }
+
+  const paparan = Math.min(100, Math.round((Math.max(...jalur.map((j) => j.skor), 1) / 15) * 100));
+
+  const hitung = {};
+  unik.forEach((j) => j.simpul.slice(1).forEach((id) => { hitung[id] = (hitung[id] || 0) + 1; }));
+  const choke = Object.entries(hitung).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([id]) => peta[id]);
+
+  const kontrol = [];
+  t.nodes.forEach((n) => {
+    (n.risiko || '').split(',').forEach((r) => {
+      const k = KONTROL[r.trim()];
+      if (k && !kontrol.find((x) => x.teks === k)) kontrol.push({ aset: n.label, teks: k });
+    });
+  });
+
+  const DAMPAK = {
+    server: 'Penguasaan server dan data operasional',
+    ot: 'Penguasaan perangkat operasional — dampak fisik',
+    host: 'Penguasaan workstation staf',
+    periferal: 'Pivot ke perangkat pendukung'
+  };
+
+  return {
+    paparan,
+    jalur: unik.map((j) => {
+      const akhir = peta[j.simpul[j.simpul.length - 1]];
+      return {
+        simpul: j.simpul.map((id) => peta[id].label),
+        tipe: j.simpul.map((id) => peta[id].tipe),
+        skor: Math.min(100, Math.round((j.skor / 15) * 100)),
+        dampak: DAMPAK[akhir.tipe] || 'Penguasaan aset',
+        target: akhir.label
+      };
+    }),
+    chokePoints: choke.map((n) => ({ label: n.label, tipe: n.tipe, risiko: n.risiko })),
+    kontrol: kontrol.slice(0, 5),
+    catatan: 'Model heuristik berbasis inventaris aset dan kelemahan yang tercatat. Bukan hasil pemindaian aktif — aman dijalankan pada jaringan operasional.'
+  };
+}
+
 let counter = 0;
 export function bangkitkanPaket({ satuanId = 'poslog', aktorId = 'ransomware', level = 'menengah' }) {
   const s = SATUAN.find((x) => x.id === satuanId) || SATUAN[0];
@@ -195,6 +287,9 @@ export function bangkitkanPaket({ satuanId = 'poslog', aktorId = 'ransomware', l
   counter += 1;
   const id = `PKT-${Date.now().toString(36).toUpperCase()}${counter}`;
 
+  const topo = topologi(s);
+  const aturan = aturanUntuk(mitre);
+
   return {
     id,
     dibuat: new Date().toISOString(),
@@ -208,7 +303,7 @@ export function bangkitkanPaket({ satuanId = 'poslog', aktorId = 'ransomware', l
     },
     ringkasan: ringkasan(a, s, lv),
     objektif: objektif(a, s, lv),
-    topologi: topologi(s),
+    topologi: topo,
     killchain: a.killchain.map((f, i) => ({
       fase: f.fase, urutan: i + 1,
       teknik: f.teknik,
@@ -216,6 +311,8 @@ export function bangkitkanPaket({ satuanId = 'poslog', aktorId = 'ransomware', l
     })),
     injects,
     rubrik: rubrik(),
+    risiko: analisisJalur(topo),
+    deteksi: { aturan, cakupan: `${aturan.length}/${mitre.length}` },
     ioc: IOC[a.id] || [],
     mitre,
     fasilitator: fasilitator(a, s, lv),
@@ -282,6 +379,8 @@ export function hitungAAR(paket, jawaban) {
 
   return {
     readiness, grade, skorKompetensi, rincian,
+    risikoBersih: paket.risiko ? Math.round(paket.risiko.paparan * (0.35 + 0.65 * (1 - readiness / 100))) : null,
+    paparan: paket.risiko ? paket.risiko.paparan : null,
     kuat: kuat.map((k) => ({ nama: k.nama, nilai: k.nilai, deskripsi: k.deskripsi })),
     lemah: lemah.map((k) => ({ nama: k.nama, nilai: k.nilai, deskripsi: k.deskripsi })),
     rekomendasi,

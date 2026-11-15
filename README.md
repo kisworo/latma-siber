@@ -1,7 +1,7 @@
 # LATMA SIBER
 
-**Platform latihan dan pengukuran kesiapan siber satuan.**
-Berjalan on-premise, tanpa internet, tanpa cloud.
+**Dari satu inventaris aset: peta risiko, aturan deteksi, dan indeks kesiapan personel.**
+Berjalan on-premise, tanpa internet, tanpa cloud, tanpa pemindaian aktif.
 
 > Pertahanan siber tidak kekurangan alat. Ia kekurangan prajurit terlatih.
 
@@ -19,11 +19,13 @@ Kartika Cyber Hackathon 2026 — Kategori Dukungan Teknologi (Core Infra) / IT-O
 
 LATMA SIBER membangkitkan paket latihan siber lengkap dalam hitungan detik, menjalankannya dalam dua mode, lalu mengukur hasilnya dalam indeks kesiapan.
 
-| Tahap | Yang dihasilkan |
+| Keluaran | Isi |
 |---|---|
-| **Mesin Pembangkit** | Topologi aset, rantai serangan dengan pemetaan MITRE ATT&CK, inject keputusan, rubrik 6 kompetensi, panduan fasilitator, indikator ancaman |
-| **Mesin Pelaksana** | Mode **tabletop** (tanpa jaringan sama sekali) dan mode **lab terisolasi** (Docker) |
-| **Mesin Penilaian** | Skor per kompetensi, indeks kesiapan 0–100, radar, linimasa keputusan, rekomendasi latihan |
+| **Peta Risiko** | Indeks paparan 0–100, peringkat jalur serangan ke aset kritis, choke point, kontrol prioritas per aset |
+| **Detection Pack** | Aturan deteksi **Sigma** siap pasang di SIEM (Wazuh/Elastic/Splunk/Sentinel) + daftar IOC |
+| **Indeks Kesiapan** | Skor 6 kompetensi per personel, radar, linimasa keputusan, rekomendasi latihan, **risiko bersih** satuan |
+
+Alurnya: pilih profil satuan → bangkitkan paket (± 4 detik) → tinjau peta risiko & Detection Pack → jalankan latihan → baca AAR → angka satuan berubah.
 
 Enam kompetensi yang dinilai: **Deteksi, Penahanan, Pemulihan, Forensik, Pelaporan, Komando.**
 

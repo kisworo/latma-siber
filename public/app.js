@@ -487,6 +487,7 @@ async function viewPaket(id) {
           <span class="pill">${p.meta.menit} menit</span>
           <span class="pill">${esc(p.meta.personel)} peserta</span>
           <span class="pill g">${esc(p.meta.kategori)}</span>
+          <span class="pill ${p.risiko && p.risiko.paparan >= 60 ? 'r' : 'a'}">PAPARAN ${p.risiko ? p.risiko.paparan : '—'}</span>
         </div>
       </div>
       <div class="btn-row no-print">
@@ -500,7 +501,7 @@ async function viewPaket(id) {
     </div>
 
     <div class="tabs no-print">
-      ${[['ringkasan', 'Ringkasan'], ['topologi', 'Topologi'], ['chain', 'Rantai Serangan'], ['inject', 'Inject (' + p.injects.length + ')'], ['rubrik', 'Rubrik'], ['fasilitator', 'Panduan Fasilitator'], ['ioc', 'Indikator']]
+      ${[['ringkasan', 'Ringkasan'], ['risiko', 'Risiko'], ['topologi', 'Topologi'], ['chain', 'Rantai Serangan'], ['inject', 'Inject (' + p.injects.length + ')'], ['rubrik', 'Rubrik'], ['fasilitator', 'Fasilitator'], ['deteksi', 'Aturan Deteksi'], ['ioc', 'Indikator']]
         .map(([k, l]) => `<button class="tab ${tab === k ? 'on' : ''}" data-tab="${k}">${l}</button>`).join('')}
     </div>
     <div class="tab-body" id="tabBody">${renderTab(p, tab)}</div>
@@ -510,9 +511,9 @@ async function viewPaket(id) {
     state.tab = el.dataset.tab;
     document.querySelectorAll('[data-tab]').forEach((x) => x.classList.toggle('on', x.dataset.tab === state.tab));
     document.getElementById('tabBody').innerHTML = renderTab(p, state.tab);
-    if (state.tab === 'inject') pasangAccordion();
+    pasangAksiTab();
   }));
-  document.getElementById('btnPrint').addEventListener('click', () => { state.tab = 'inject'; document.getElementById('tabBody').innerHTML = renderTab(p, 'inject'); window.print(); });
+  document.getElementById('btnPrint').addEventListener('click', () => { state.tab = 'inject'; document.getElementById('tabBody').innerHTML = renderTab(p, 'inject'); pasangAksiTab(); window.print(); });
   document.getElementById('btnJson').addEventListener('click', async () => {
     const blob = new Blob([JSON.stringify(p, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -521,7 +522,31 @@ async function viewPaket(id) {
     a.click();
   });
   document.getElementById('btnRun').addEventListener('click', () => dialogMulai(p));
-  if (tab === 'inject') pasangAccordion();
+  pasangAksiTab();
+}
+
+function pasangAksiTab() {
+  pasangAccordion();
+  document.querySelectorAll('[data-sig] .inject-head').forEach((h) => {
+    h.addEventListener('click', () => h.parentElement.classList.toggle('open'));
+  });
+  const aturan = (state.paket && state.paket.deteksi && state.paket.deteksi.aturan) || [];
+  const btnCopy = document.getElementById('btnCopyAll');
+  if (btnCopy) btnCopy.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(aturan.map((x) => x.yaml).join('\n---\n'));
+      btnCopy.textContent = 'Tersalin ✓';
+      setTimeout(() => { btnCopy.textContent = 'Salin semua'; }, 1800);
+    } catch { btnCopy.textContent = 'Gagal menyalin'; }
+  });
+  const btnDl = document.getElementById('btnDlSigma');
+  if (btnDl) btnDl.addEventListener('click', () => {
+    const blob = new Blob([aturan.map((x) => x.yaml).join('\n---\n')], { type: 'text/yaml' });
+    const el = document.createElement('a');
+    el.href = URL.createObjectURL(blob);
+    el.download = 'latma-detection-pack.yml';
+    el.click();
+  });
 }
 
 function renderTab(p, tab) {
@@ -640,6 +665,87 @@ function renderTab(p, tab) {
       <div class="panel-label">// PRASYARAT</div>
       <ul class="bullets">${p.prasyarat.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
     </div>`;
+
+  if (tab === 'risiko') return `
+    <div class="grid-2">
+      <div class="card card-pad">
+        <div class="panel-label">// INDEKS PAPARAN</div>
+        <div style="display:flex;align-items:baseline;gap:14px">
+          <div class="mono" style="font-size:54px;line-height:1;color:${warna(100 - p.risiko.paparan)}">${p.risiko.paparan}</div>
+          <div class="dim" style="font-size:11.5px;line-height:1.5">dari 100<br>semakin tinggi, semakin mudah ditembus</div>
+          <span class="pill ${p.risiko.paparan >= 70 ? 'r' : p.risiko.paparan >= 50 ? 'a' : 'g'}" style="margin-left:auto">${p.risiko.paparan >= 70 ? 'TINGGI' : p.risiko.paparan >= 50 ? 'SEDANG' : 'RENDAH'}</span>
+        </div>
+        <div class="meter-bar" style="margin-top:14px;height:6px"><i style="width:${p.risiko.paparan}%;background:${warna(100 - p.risiko.paparan)}"></i></div>
+        <p class="dim" style="font-size:11.5px;margin-top:14px;line-height:1.6">${esc(p.risiko.catatan)}</p>
+      </div>
+      <div class="card card-pad">
+        <div class="panel-label">// TITIK KRITIS — TUTUP DI SINI</div>
+        ${p.risiko.chokePoints.map((c) => `
+          <div style="padding:10px 0;border-bottom:1px dashed rgba(28,43,36,.7)">
+            <div class="mono" style="font-size:12.5px;color:var(--text)">${esc(c.label)}</div>
+            <div class="dim" style="font-size:11px;margin-top:2px">${esc(c.tipe.toUpperCase())} · ${esc(c.risiko)}</div>
+            ${(() => { const k = p.risiko.kontrol.find((x) => x.aset === c.label); return k ? `<div style="font-size:11px;color:var(--green);margin-top:5px;line-height:1.5">→ ${esc(k.teks)}</div>` : ''; })()}
+          </div>`).join('')}
+        <p class="dim" style="font-size:11.5px;margin-top:12px">Aset ini muncul pada sebagian besar jalur serangan. Menutup satu titik di sini memutus banyak jalur sekaligus.</p>
+      </div>
+    </div>
+
+    <div class="card card-pad" style="margin-top:14px">
+      <div class="panel-label">// JALUR SERANGAN PALING MUNGKIN</div>
+      <div style="display:flex;gap:14px;padding:4px 0 7px;border-bottom:1px solid var(--line)">
+        <div class="mono" style="width:46px;font-size:9px;color:var(--dim);letter-spacing:.14em">SKOR</div>
+        <div class="mono" style="flex:1;font-size:9px;color:var(--dim);letter-spacing:.14em">JALUR</div>
+        <div class="mono" style="font-size:9px;color:var(--dim);letter-spacing:.14em">TARGET</div>
+      </div>
+      ${p.risiko.jalur.map((j) => `
+        <div style="display:flex;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(28,43,36,.6)">
+          <div class="mono" style="width:46px;font-size:19px;color:${warna(100 - j.skor)}">${j.skor}</div>
+          <div style="flex:1">
+            <div style="font-size:12.5px;font-weight:550;line-height:1.5">${j.simpul.map((x) => esc(x)).join(' <span class="dim">→</span> ')}</div>
+            <div class="dim" style="font-size:11px;margin-top:3px">${esc(j.dampak)}</div>
+          </div>
+          <span class="pill ${j.skor >= 60 ? 'r' : 'a'}">TARGET ${esc(j.target)}</span>
+        </div>`).join('')}
+    </div>
+
+    <div class="card card-pad" style="margin-top:14px">
+      <div class="panel-label">// KONTROL PRIORITAS</div>
+      <div>
+        ${p.risiko.kontrol.map((k, i) => `
+          <div style="display:flex;gap:12px;padding:11px 0;border-bottom:1px solid rgba(28,43,36,.55)">
+            <div class="mono" style="font-size:11px;color:var(--green);flex:none;width:18px">0${i + 1}</div>
+            <div>
+              <div class="mono" style="font-size:10px;letter-spacing:.1em;color:var(--dim);margin-bottom:3px">${esc(k.aset)}</div>
+              <div style="font-size:12.5px;color:var(--muted);line-height:1.55">${esc(k.teks)}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  if (tab === 'deteksi') return `
+    <div class="card card-pad" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;border-color:var(--line-2)">
+      <div style="flex:1;min-width:280px">
+        <div class="panel-label">// DETECTION PACK</div>
+        <h3 style="margin-bottom:6px">${p.deteksi.aturan.length} aturan Sigma siap pasang</h3>
+        <p class="dim" style="font-size:12.5px;line-height:1.6">Dibangkitkan dari ${esc(p.deteksi.cakupan)} teknik ATT&CK pada skenario ini. Format Sigma dapat langsung dipakai di SIEM satuan (Wazuh, Elastic, Splunk, Sentinel).</p>
+      </div>
+      <div class="btn-row no-print">
+        <button class="btn" id="btnCopyAll">Salin semua</button>
+        <button class="btn btn-primary" id="btnDlSigma">Unduh .yml</button>
+      </div>
+    </div>
+    ${p.deteksi.aturan.map((x, i) => `
+      <div class="inject-item ${i === 0 ? 'open' : ''}" data-sig="${i}" style="margin-top:10px">
+        <div class="inject-head">
+          <span class="inject-id">${esc(x.teknik)}</span>
+          <span class="inject-judul">${esc(x.judul)}</span>
+          <span class="pill ${x.level === 'critical' ? 'r' : x.level === 'high' ? 'a' : ''}">${esc(x.level.toUpperCase())}</span>
+        </div>
+        <div class="inject-body" style="display:block;padding-top:0">
+          <pre style="background:var(--bg);border:1px solid var(--line);padding:14px;overflow-x:auto;font-family:var(--mono);font-size:10.5px;line-height:1.6;color:var(--muted);margin-top:8px">${esc(x.yaml)}</pre>
+        </div>
+      </div>`).join('')}
+    <p class="dim" style="font-size:11.5px;margin-top:12px">Aturan bersifat template: sesuaikan jalur log dan daftar putih dengan lingkungan satuan sebelum diterapkan.</p>`;
 
   if (tab === 'ioc') return `
     <div class="grid-2">
@@ -896,7 +1002,10 @@ async function viewAAR(id) {
             <dt>Tingkat</dt><dd style="text-align:right">${esc(sesi.level)}</dd>
             <dt>Satuan</dt><dd style="text-align:right;font-size:11.5px">${esc(sesi.satuanNama)}</dd>
             <dt>Status</dt><dd style="text-align:right"><span class="pill ${a.readiness >= 80 ? 'g' : a.readiness >= 65 ? 'a' : 'r'}">${a.grade}</span></dd>
+            ${a.paparan !== null ? `<dt>Paparan</dt><dd style="text-align:right">${a.paparan}</dd>
+            <dt>Risiko bersih</dt><dd style="text-align:right;color:var(--green)">${a.risikoBersih}</dd>` : ''}
           </dl>
+          ${a.paparan !== null ? `<div style="margin-top:14px;padding:10px 12px;border:1px solid var(--line);background:rgba(87,224,140,.05);font-size:11.5px;line-height:1.55;color:var(--muted)">Tanpa latihan, risiko bersih satuan ini <b style="color:var(--text)">${a.paparan}</b>. Setelah sesi ini turun ke <b style="color:var(--green)">${a.risikoBersih}</b>.</div>` : ''}
           <div class="panel-label" style="margin-top:18px">// CATATAN</div>
           <p class="dim" style="font-size:11.5px;line-height:1.6">Nilai dihitung dari bobot enam kompetensi. Sesi tersimpan lokal di perangkat satuan.</p>
         </div>
